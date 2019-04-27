@@ -1,155 +1,135 @@
-"""
-index.py
-author: Jiaqi Wang
-E-mail: wangjiaqi2017@brandeis.edu
-his is one of the two main files for this project. It builds the various shelf files
-that the information retrieval system uses. Running it takes about 30 seconds.
-"""
-
 import json
-import math
-from collections import defaultdict
-import shelve
-from nltk.corpus import stopwords
-from nltk import word_tokenize
-from nltk import PorterStemmer
+import re
+import time
 
-# the dictionary from term to list of ids
-tm_dct = defaultdict(list)
-# the dictionary from id to another dictionary of movie data
-doc_data_dct = dict()
-# the dictionary from token to its frequency: to analyze which word should be added to stop word list
-# token_dct = dict()  # you can uncomment here if you like to see how I see the frequencies of tokens
-# the nested dictionary from film ids to all of the terms in that film to those terms’ length-normalized tf-idf values
-vector_dct = dict()
-# the dictionary from film ids to its doc length
-doc_len_dct = dict()
-# the dictionary of terms to log inverse document frequencies
-idf_dct = dict()
+from elasticsearch import Elasticsearch
+from elasticsearch import helpers
+from elasticsearch_dsl import Index, Document, Text, Keyword, Integer, Completion
+from elasticsearch_dsl.connections import connections
+from elasticsearch_dsl.analysis import tokenizer, analyzer, token_filter
+from elasticsearch_dsl.query import MultiMatch, Match
 
-# the stemmer from nltk package
-ps = PorterStemmer()
-# the stop word list which construct from nltk default stop list and from our word frequency analysis
-stop_lst = stopwords.words('english')
-# this extended list is from word frequency analysis, I analyzed top 50 words below the the word I picked
-# stop_lst.extend(['film', 'released', 'cast', 'also', 'release', 'directed', 'production', 'references',
-#                  'links', 'external', 'imdb', 'festival', 'based', 'story', 'movie', 'stars', 'films', 'plot',
-#                  'reviews', 'written', 'rating', 'director', 'may'])
+# Connect to local host server
+connections.create_connection(hosts=['127.0.0.1'])
 
+# Create elasticsearch object
+es = Elasticsearch()
 
-# read the corpus data
-def read_corpus(corpus_file):
-    f = open(corpus_file, 'r')
-    cps = json.load(f)
-    f.close()
-    return cps
+# Define analyzers appropriate for your data.
+# You can create a custom analyzer by choosing among elasticsearch options
+# or writing your own functions.
+# Elasticsearch also has default analyzers that might be appropriate.
+my_analyzer = analyzer('custom1',
+                       tokenizer='standard',
+                       filter=['lowercase', 'stop'])
 
-
-# read the corpus file to build the term index dict and doc_data dict
-def build_idx(cps):
-    # get the num of film files
-    num_of_fms = len(cps)
-    print(num_of_fms)
-    for fm in cps.keys():
-        doc_data_dct[fm] = cps[fm]
-        word = cps[fm]['Title'][0] + ' ' + cps[fm]['Text']
-        all_terms = build_term(word)
-        freq_v = dict()
-        for tm in set(all_terms):
-            tm_dct[tm].append(fm)
-            tm_freq = all_terms.count(tm)
-            freq_v[tm] = 1 + math.log10(tm_freq)
-            idf_dct[tm] = idf_dct.get(tm, 0) + 1.0
-        vector_dct[fm] = freq_v
-
-    for tm in idf_dct:
-        idf_dct[tm] = math.log10(num_of_fms / idf_dct[tm])
-
-    for fm in vector_dct:
-        freq_square_sum = 0
-        for tm in vector_dct[fm]:
-            freq_square_sum += (vector_dct[fm][tm] * idf_dct[tm]) ** 2
-        doc_len_dct[fm] = math.sqrt(freq_square_sum)
-
-    for fm in vector_dct:
-        for tm in vector_dct[fm]:
-            vector_dct[fm][tm] *= idf_dct[tm]
-            vector_dct[fm][tm] /= doc_len_dct[fm]
+# --- Add more analyzers here ---
+# use stopwords... or not?
+# use stemming... or not?
+# the analyzer which tokenize for text, use stopwords stemming, lowercase and ascii-folding
+text_analyzer = analyzer('custom2',
+                         tokenizer='letter',
+                         filter=["stop", "lowercase", "porter_stem", "asciifolding"]
+                         )
+# the folding analyzer which only use lowercase and ascii-folding
+folding_analyzer = analyzer('custom3',
+                            tokenizer='standard',
+                            filter=["lowercase", "asciifolding"])
+# the category analyzer which use lowercase, ascii-folding and stemming
+cat_analyzer = analyzer('custom4',
+                        tokenizer='standard',
+                        filter=["lowercase", "asciifolding", "porter_stem"])
 
 
-# the function which take a word string as input, and convert it to a list of terms
-def build_term(word):
-    # Spider-Man => Spider Man
-    if '-' in word:
-        word = word.replace("-", " ")
-    # U.S.A => USA
-    if '.' in word:
-        word = word.replace(".", "")
+# Define document mapping (schema) by defining a class as a subclass of Document.
+# This defines fields and their properties (type and analysis applied).
+# You can use existing es analyzers or use ones you define yourself as above.
+class Movie(Document):
+    title = Text(analyzer=text_analyzer)
+    title_suggest = Completion()  # for autocomplete
+    text = Text(analyzer=text_analyzer)
+    star = Text(analyzer=folding_analyzer)
+    runtime = Integer()
+    language = Text(analyzer='simple')
+    country = Text(analyzer='simple')
+    director = Text(analyzer=folding_analyzer)
+    location = Text(analyzer='simple')
+    time = Text(analyzer='simple')
+    categories = Text(analyzer=cat_analyzer)
 
-    tokenized_list = [token.lower() for token in word_tokenize(word)
-                      if (token.lower() not in stop_lst) and token.isalpha()]
-    term_list = [ps.stem(token) for token in tokenized_list]
-    # the code snippet which help us to analyze word frequency
-    # for tk in tokenized_list:
-    #     token_dct[tk] = 1 if tk not in token_dct else token_dct[tk] + 1
-    return term_list
+    # --- Add more fields here ---
+    # What data type for your field? List?
+    # Which analyzer makes sense for each field?
 
-
-# the function which store the various dictionaries into disk
-def store_index():
-    idx_sh = shelve.open('inverted_index', writeback=False)
-    for term in tm_dct.keys():
-        # we sort our posting_lst to help us to do intersect from shortest list
-        posting_lst = sorted([int(i) for i in tm_dct[term]])
-        idx_sh[term] = [str(num) for num in posting_lst]
-    idx_sh.close()
-
-    doc_sh = shelve.open('film_doc', writeback=False)
-    doc_sh.update(doc_data_dct)
-    doc_sh.close()
-
-    vct_sh = shelve.open('film_v', writeback=False)
-    vct_sh.update(vector_dct)
-    vct_sh.close()
-
-    idf_sh = shelve.open('film_idf', writeback=False)
-    idf_sh.update(idf_dct)
-    idf_sh.close()
-
-    len_sh = shelve.open('film_doc_len', writeback=False)
-    len_sh.update(doc_len_dct)
-    len_sh.close()
+    # override the Document save method to include subclass field definitions
+    def save(self, *args, **kwargs):
+        return super(Movie, self).save(*args, **kwargs)
 
 
-# the word frequency analysis function, you can uncomment this function to compute word_frequency
-# def word_frequency():
-#     pq = queue.PriorityQueue()
-#     for token in token_dct.keys():
-#         pq.put((-token_dct[token], str(token)))
-#     for i in range(50):
-#         print(pq.get()[1])
+# Populate the index
+# when time is not digit, just return 0 instead
+def get_stars(stars):
+    if stars.isdigit():
+        return int(stars)
+    else:
+        return 0
 
-# the function which get the stop_word from word_str given
-def get_stop_word(word_str):
-    # Spider-Man => Spider Man
-    if '-' in word_str:
-        word_str = word_str.replace("-", " ")
-    # U.S.A => USA
-    if '.' in word_str:
-        word_str = word_str.replace(".", "")
 
-    stop_word_lst = [t.lower() for t in word_tokenize(word_str)
-                     if (t.lower() in stop_lst) or (not t.isalpha())]
-    return set(stop_word_lst)
+def buildIndex():
+    """
+    buildIndex creates a new film index, deleting any existing index of
+    the same name.
+    It loads a json file containing the movie corpus and does bulk loading
+    using a generator function.
+    """
+    film_index = Index('sample_film_index')
+    if film_index.exists():
+        film_index.delete()  # Overwrite any previous version
+    # create mapping from index to document
+    film_index.document(Movie)
+    film_index.create()
+
+    # Open the json film corpus
+    with open('CAbusinessreview.json', 'r', encoding='utf-8') as data_file:
+        # load movies from json file into dictionary
+        restaurants = json.load(data_file)
+        size = len(restaurants)
+
+    # Action series for bulk loading with helpers.bulk function.
+    # Implemented as a generator, to return one movie with each call.
+    # Note that we include the index name here.
+    # The Document type is always 'doc'.
+    # Every item to be indexed must have a unique key.
+    def actions():
+        # mid is movie id (used as key into movies dictionary)
+        for mid in range(1, size + 1):
+            yield {
+                "_index": "food_finder_index",
+                "_type": 'doc',
+                "_id": mid,
+                "name": restaurants[mid][1],
+                "name_suggest": restaurants[mid][1],
+                "review": restaurants[mid][11],
+                "address": restaurants[mid][2],
+                "city": restaurants[mid][5],  # You would like to convert runtime to
+                # integer (in minutes) --- Add more fields here ---
+                "stars": restaurants[mid][10],
+                "country": ', '.join(movies[str(mid)]['Country']),
+                "director": ', '.join(movies[str(mid)]['Director']),
+                "location": ', '.join(movies[str(mid)]['Location']),
+                "time": ', '.join(movies[str(mid)]['Time']),
+                "categories": ', '.join(movies[str(mid)]['Categories'])
+            }
+
+    helpers.bulk(es, actions())
+
+
+# command line invocation builds index and prints the running time.
+def main():
+    start_time = time.time()
+    buildIndex()
+    print("=== Built index in %s seconds ===" % (time.time() - start_time))
 
 
 if __name__ == '__main__':
-    # read our corpus
-    # corp = read_corpus('test_corpus.json')
-    corp = read_corpus('2018_movies.json')
-    # build two dictionaries from corp
-    build_idx(corp)
-    # store two dictionaries into disk
-    store_index()
-    # the function to analyze the word frequency
-    # word_frequency()
+    main()
