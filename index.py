@@ -44,18 +44,23 @@ cat_analyzer = analyzer('custom4',
 # Define document mapping (schema) by defining a class as a subclass of Document.
 # This defines fields and their properties (type and analysis applied).
 # You can use existing es analyzers or use ones you define yourself as above.
-class Movie(Document):
-    title = Text(analyzer=text_analyzer)
-    title_suggest = Completion()  # for autocomplete
-    text = Text(analyzer=text_analyzer)
-    star = Text(analyzer=folding_analyzer)
-    runtime = Integer()
-    language = Text(analyzer='simple')
-    country = Text(analyzer='simple')
-    director = Text(analyzer=folding_analyzer)
-    location = Text(analyzer='simple')
-    time = Text(analyzer='simple')
-    categories = Text(analyzer=cat_analyzer)
+class Restaurant(Document):
+    name = Text(analyzer=text_analyzer)
+    # title_suggest = Completion()  # for autocomplete
+    review = Text(analyzer=text_analyzer)
+    # star = Text(analyzer=folding_analyzer)
+    star = Integer()
+    review_count = Integer()
+    cool = Integer()
+    useful = Integer()
+    funny = Integer()
+    city = Text(analyzer='simple')
+    state = Text(analyzer='simple')
+    address = Text(analyzer=folding_analyzer)
+    date = Text(analyzer='simple')
+
+    # time = Text(analyzer='simple')
+    # categories = Text(analyzer=cat_analyzer)
 
     # --- Add more fields here ---
     # What data type for your field? List?
@@ -63,14 +68,14 @@ class Movie(Document):
 
     # override the Document save method to include subclass field definitions
     def save(self, *args, **kwargs):
-        return super(Movie, self).save(*args, **kwargs)
+        return super(Restaurant, self).save(*args, **kwargs)
 
 
 # Populate the index
 # when time is not digit, just return 0 instead
-def get_stars(stars):
-    if stars.isdigit():
-        return int(stars)
+def get_num(num):
+    if isinstance(num, float):
+        return float(num)
     else:
         return 0
 
@@ -82,18 +87,20 @@ def buildIndex():
     It loads a json file containing the movie corpus and does bulk loading
     using a generator function.
     """
-    film_index = Index('sample_film_index')
-    if film_index.exists():
-        film_index.delete()  # Overwrite any previous version
+    restaurant_index = Index('sample_restaurant_index')
+    if restaurant_index.exists():
+        restaurant_index.delete()  # Overwrite any previous version
     # create mapping from index to document
-    film_index.document(Movie)
-    film_index.create()
+    restaurant_index.document(Restaurant)
+    restaurant_index.create()
 
     # Open the json film corpus
-    with open('CAbusinessreview.json', 'r', encoding='utf-8') as data_file:
+    with open('ca_business_review.json', 'r', encoding='utf-8') as data_file:
         # load movies from json file into dictionary
         restaurants = json.load(data_file)
         size = len(restaurants)
+        # print(size)
+        # print(restaurants['5']['review'])
 
     # Action series for bulk loading with helpers.bulk function.
     # Implemented as a generator, to return one movie with each call.
@@ -104,24 +111,26 @@ def buildIndex():
         # mid is movie id (used as key into movies dictionary)
         for mid in range(1, size + 1):
             yield {
-                "_index": "food_finder_index",
+                "_index": "sample_restaurant_index",
                 "_type": 'doc',
-                "_id": mid,
-                "name": restaurants[mid][1],
-                "name_suggest": restaurants[mid][1],
-                "review": restaurants[mid][11],
-                "address": restaurants[mid][2],
-                "city": restaurants[mid][5],  # You would like to convert runtime to
+                "_id": mid - 1,
+                "name": restaurants[str(mid - 1)]['business_name'],
+                # "name_suggest": restaurants[str(mid)]['business_name'],
+                "review": restaurants[str(mid - 1)]['review'],
+                "address": restaurants[str(mid - 1)]['address'],
+                "city": restaurants[str(mid - 1)]['city'],  # You would like to convert runtime to
                 # integer (in minutes) --- Add more fields here ---
-                "stars": restaurants[mid][10],
-                "country": ', '.join(movies[str(mid)]['Country']),
-                "director": ', '.join(movies[str(mid)]['Director']),
-                "location": ', '.join(movies[str(mid)]['Location']),
-                "time": ', '.join(movies[str(mid)]['Time']),
-                "categories": ', '.join(movies[str(mid)]['Categories'])
+                "star": get_num(restaurants[str(mid - 1)]['stars']),
+                "state": restaurants[str(mid - 1)]['state'],
+                "review_count": get_num(restaurants[str(mid - 1)]['review_count']),
+                "useful": get_num(restaurants[str(mid - 1)]['useful']),
+                "cool": get_num(restaurants[str(mid - 1)]['cool']),
+                "funny": get_num(restaurants[str(mid - 1)]['funny']),
+                "date": restaurants[str(mid - 1)]['date']
             }
 
     helpers.bulk(es, actions())
+    print(restaurant_index)
 
 
 # command line invocation builds index and prints the running time.
