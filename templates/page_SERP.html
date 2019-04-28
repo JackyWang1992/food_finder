@@ -49,43 +49,37 @@ p.cannotfind {
 </style>
 
 <div class="searchbox">
-<h3 class="header"> Wikipedia Film Search </h3>
+<img src="https://i.ibb.co/zSwnNtG/food-finder-thumbnail.png" alt="drawing" width="40"/><h3 class="header"> Find Food Search </h3>
 
 <form action="/results" name="search" method="post">
 <dl>
-        <dd><textarea rows="2" cols="100" name="query">{{queries['text']}}</textarea>
-        <dd>Search in director: <input type="text" style="width:300px" name="director" value="{{queries['director']}}">
-        <dd>Search in starring: <input type="text" style="width:300px" name="starring" value="{{queries['starring']}}">
-        <dd>Language search: <input list="language" name="language" value="{{queries['language']}}">
-                            <datalist id="language">
-                                <option value="English">
-                                <option value="French">
-                                <option value="Chinese">
-                                <option value="Japanese">
-                                <option value="Korean">
-                                <option value="Germany">
-                                <option value="Italian">
-                                <option value="Spanish">
-                                <option value="Indian">
-                                <option value="Austrian">
+    <p>Free text search:</p>
+        <dd><textarea rows="2" cols="100" name="query">{{queries['query']}}</textarea>
+        <dd>Search in address: <input type="text" style="width:300px" name="address" value="{{queries['address']}}">
+        <dd>Search in city: <input type="text" style="width:300px" name="city" value="{{queries['city']}}">
+{#        <dd>City search: <input list="city" name="city">#}
+{#                            <datalist id="city">#}
+{#                                <option value="Chandler">#}
+{#                                <option value="Scottsdale">#}
+{#                                <option value="Mesa">#}
+{#                                <option value="Phoenix">#}
+{#                                <option value="Dublin">#}
+{#                                <option value="Los Angeles">#}
+{#                                <option value="Monterey Park">#}
+{#                                <option value="San Diego">#}
+{#                                <option value="Sacramento">#}
+{#                            </datalist>#}
+        <dd>State search: <input list="state" name="state" value="{{queries['state']}}">
+                            <datalist id="state">
+                                <option value="CA">
+                                <option value="AZ">
                             </datalist>
-        <dd>Country search: <input list="country" name="country" value="{{queries['country']}}">
-                            <datalist id="country">
-                                <option value="China">
-                                <option value="South Korea">
-                                <option value="United States">
-                                <option value="Japan">
-                                <option value="Russia">
-                                <option value="Sweden">
-                                <option value="Canada">
-                                <option value="Malaysia">
-                                <option value="India">
-                                <option value="Austria">
-                            </datalist>
-        <dd>Location search: <input type="text" style="width:300px" name="location" value="{{queries['location']}}">
-        <dd>Time search: <input type="text" style="width:300px" name="time" value="{{queries['time']}}">
-        <dd>Runtime: min <input type="text" name="mintime" value="{{queries['mintime']}}"> max <input type="text" name="maxtime" value="{{queries['maxtime']}}">
-        <dd>Categories search: <input type="text" style="width:300px" name="categories" value="{{queries['categories']}}">
+        <dd>Review Count: min <input type="text" name="min_review" value="{{queries['min_review']}}"> max <input type="text" name="max_review" value="{{queries['max_review']}}">
+        <dd>Stars: min <input type="text" name="min_star" value="{{queries['min_star']}}"> max <input type="text" name="max_star" value="{{queries['max_star']}}">
+        <dd>Useful: min <input type="text" name="min_useful" value="{{queries['min_useful']}}"> max <input type="text" name="max_useful" value="{{queries['max_useful']}}">
+        <dd>Cool: min <input type="text" name="min_cool" value="{{queries['min_cool']}}"> max <input type="text" name="max_cool" value="{{queries['max_cool']}}">
+        <dd>Funny: min <input type="text" name="min_funny" value="{{queries['min_funny']}}"> max <input type="text" name="max_funny" value="{{queries['max_funny']}}">
+        <dd>Date search: <input type="text" style="width:300px" name="date" value="{{queries['date']}}">
         <dd><input type="submit" value="Search">
 </dl>
 </form>
@@ -116,8 +110,8 @@ p.cannotfind {
     {% if res_num %}
         {% for res in results %}
         <ul>
-            <pre class="sansserif"><a href="/documents/{{res}}" target="_blank">  {{ results[res]['title']|safe }} </a>    score: {{results[res]['score']}} </pre>
-            <p class="results">{{results[res]['text'] | safe}}</p>
+            <pre class="sansserif"><a href="/documents/{{res}}" target="_blank">  {{ results[res]['name']|safe }} </a>    score: {{results[res]['score']}} </pre>
+            <p class="results">{{results[res]['review'] | safe}}</p>
         </ul>
         {% endfor %}
     {% else %}
