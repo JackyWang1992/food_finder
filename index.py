@@ -73,11 +73,11 @@ class Restaurant(Document):
 
 # Populate the index
 # when time is not digit, just return 0 instead
-# def get_num(num):
-#     if isinstance(num, float) or isinstance(num, str) and str.isdigit():
-#         return float(num)
-#     else:
-#         return 0
+def get_num(num):
+    if isinstance(num, float):
+        return float(num)
+    else:
+        return 0
 
 
 def buildIndex():
@@ -111,7 +111,7 @@ def buildIndex():
         # mid is movie id (used as key into movies dictionary)
         for mid in range(1, size + 1):
             yield {
-                "_index": "food_finder_index",
+                "_index": "sample_restaurant_index",
                 "_type": 'doc',
                 "_id": mid - 1,
                 "name": restaurants[str(mid - 1)]['business_name'],
@@ -120,17 +120,17 @@ def buildIndex():
                 "address": restaurants[str(mid - 1)]['address'],
                 "city": restaurants[str(mid - 1)]['city'],  # You would like to convert runtime to
                 # integer (in minutes) --- Add more fields here ---
-                "star": restaurants[str(mid - 1)]['stars'],
+                "star": get_num(restaurants[str(mid - 1)]['stars']),
                 "state": restaurants[str(mid - 1)]['state'],
-                "review_count": restaurants[str(mid - 1)]['review_count'],
-                "useful": restaurants[str(mid - 1)]['useful'],
-                "cool": restaurants[str(mid - 1)]['cool'],
-                "funny": restaurants[str(mid - 1)]['funny'],
+                "review_count": get_num(restaurants[str(mid - 1)]['review_count']),
+                "useful": get_num(restaurants[str(mid - 1)]['useful']),
+                "cool": get_num(restaurants[str(mid - 1)]['cool']),
+                "funny": get_num(restaurants[str(mid - 1)]['funny']),
                 "date": restaurants[str(mid - 1)]['date']
             }
 
     helpers.bulk(es, actions())
-    print(restaurant_index.to_dict())
+    print(restaurant_index)
 
 
 # command line invocation builds index and prints the running time.

@@ -49,26 +49,25 @@ p.cannotfind {
 </style>
 
 <div class="searchbox">
-<img src="https://i.ibb.co/zSwnNtG/food-finder-thumbnail.png" alt="drawing" width="40"/><h3 class="header"> Find Food Search </h3>
+<h3 class="header"> Find Food Search </h3>
 
 <form action="/results" name="search" method="post">
 <dl>
     <p>Free text search:</p>
         <dd><textarea rows="2" cols="100" name="query">{{queries['query']}}</textarea>
         <dd>Search in address: <input type="text" style="width:300px" name="address" value="{{queries['address']}}">
-        <dd>Search in city: <input type="text" style="width:300px" name="city" value="{{queries['city']}}">
-{#        <dd>City search: <input list="city" name="city">#}
-{#                            <datalist id="city">#}
-{#                                <option value="Chandler">#}
-{#                                <option value="Scottsdale">#}
-{#                                <option value="Mesa">#}
-{#                                <option value="Phoenix">#}
-{#                                <option value="Dublin">#}
-{#                                <option value="Los Angeles">#}
-{#                                <option value="Monterey Park">#}
-{#                                <option value="San Diego">#}
-{#                                <option value="Sacramento">#}
-{#                            </datalist>#}
+        <dd>Search in city: <input list="city" name="city" value="{{queries['city']}}">
+                            <datalist id="city">
+                                <option value="Chandler">
+                                <option value="Scottsdale">
+                                <option value="Mesa">
+                                <option value="Phoenix">
+                                <option value="Dublin">
+                                <option value="Los Angeles">
+                                <option value="Monterey Park">
+                                <option value="San Diego">
+                                <option value="Sacramento">
+                            </datalist>
         <dd>State search: <input list="state" name="state" value="{{queries['state']}}">
                             <datalist id="state">
                                 <option value="CA">

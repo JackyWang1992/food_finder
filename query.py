@@ -92,12 +92,12 @@ def results(page):
         if len(min_star_query) is 0:
             min_star = 0
         else:
-            min_star = int(min_star_query)
+            min_star = float(min_star_query)
         max_star_query = request.form['max_star']
         if len(max_star_query) is 0:
             max_star = 5
         else:
-            max_star = int(max_star_query)
+            max_star = float(max_star_query)
 
         min_review_count_query = request.form['min_review']
         if len(min_review_count_query) is 0:
@@ -314,9 +314,9 @@ def results(page):
     s = s.highlight('useful', fragment_size=999999999, number_of_fragments=1)
     s = s.highlight('date', fragment_size=999999999, number_of_fragments=1)
     s = s.highlight('review_count', fragment_size=999999999, number_of_fragments=1)
-
+    # print(len(s))
     response = s[start:end].execute()
-    print(response.hits.total)
+    print(response)
     # insert data into response
     resultList = {}
     for hit in response.hits:
@@ -330,9 +330,9 @@ def results(page):
                 result['name'] = hit.name
 
             if 'review' in hit.meta.highlight:
-                result['review'] = hit.meta.highlight.reivew[0]
+                result['review'] = hit.meta.highlight.review[0]
             else:
-                result['review'] = hit.reivew
+                result['review'] = hit.review
 
             if 'star' in hit.meta.highlight:
                 result['star'] = hit.meta.highlight.star[0]
@@ -413,7 +413,7 @@ def results(page):
                 message.append('Unknown search term: ' + ", ".join(unknowns))
 
         if len(address_query) > 0:
-            message.append('Cannot find star: ' + address_query)
+            message.append('Cannot find address: ' + address_query)
 
         return render_template('page_SERP.html', mode=mode, results=message, res_num=result_num, page_num=page,
                                queries=shows)
