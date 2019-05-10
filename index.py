@@ -54,10 +54,10 @@ class Restaurant(Document):
     cool = Integer()
     useful = Integer()
     funny = Integer()
-    city = Text(analyzer='simple')
-    state = Text(analyzer='simple')
-    address = Text(analyzer=folding_analyzer)
-    date = Text(analyzer='simple')
+    city = Keyword()
+    state = Keyword()
+    address = Keyword()
+    date = Keyword()
 
     # time = Text(analyzer='simple')
     # categories = Text(analyzer=cat_analyzer)
@@ -95,7 +95,7 @@ def buildIndex():
     restaurant_index.create()
 
     # Open the json film corpus
-    with open('ca_business_review.json', 'r', encoding='utf-8') as data_file:
+    with open('az_restaurant_reviews.json', 'r', encoding='utf-8') as data_file:
         # load movies from json file into dictionary
         restaurants = json.load(data_file)
         size = len(restaurants)
