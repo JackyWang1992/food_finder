@@ -15,6 +15,8 @@ https://elasticsearch-dsl.readthedocs.io/en/latest/search_dsl.html
 import re
 from flask import *
 from nltk.corpus import stopwords
+import nltk
+from nltk.corpus import PlaintextCorpusReader
 
 from index import Restaurant
 from pprint import pprint
@@ -273,17 +275,37 @@ def results(page):
 
     # store the temporary search result before we do text query
     temp_s = s
-    # use "phrase" type search to find specific phrases
-    for ph in phrases:
-        s = s.query('multi_match', query=ph, type='phrase', fields=['name', 'review'], operator='and')
-        text_query = text_query.replace(ph, '')
-    # use "phrase" type search to find other single word one by one
-    for token in text_query.split():
-        s = s.query('multi_match', query=token, type='phrase', fields=['name', 'review'], operator='and')
-    text_query = text_query.strip()
+
     # Conjunctive search over multiple fields (title and text) using the text_query passed in
     if len(text_query) > 0:
-        s = s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='and')
+        if "\"" in text_query:
+            phrase_query = re.findall(r'"(.*?)"', text_query)
+            remaining_text = text_query
+            remaining_text = (re.sub(r'"(.*?)"', '', remaining_text)).strip()
+            for ph in phrase_query:
+                if len(ph) > 0:
+                    s = s.query('multi_match', query=ph, type='phrase', fields=['name', 'review'], operator='and')
+            if len(remaining_text) > 0:
+                s = s.query('multi_match', query=remaining_text, type='cross_fields', fields=['name', 'review'], operator='and')
+        else:
+            s = s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='and')
+            print(text_query)
+            # print(hit.text)
+
+
+    # # use "phrase" type search to find specific phrases
+    # for ph in phrases:
+    #     s = s.query('multi_match', query=ph, type='phrase', fields=['name', 'review'], operator='and')
+    #     text_query = text_query.replace(ph, '')
+    #     print(ph)
+    # # use "phrase" type search to find other single word one by one
+    # for token in text_query.split():
+    #     s = s.query('multi_match', query=token, type='phrase', fields=['name', 'review'], operator='and')
+    #     print(token)
+    # text_query = text_query.strip()
+    # # Conjunctive search over multiple fields (title and text) using the text_query passed in
+    # if len(text_query) > 0:
+    #     s = s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='and')
 
     # determine the subset of results to display (based on current <page> value)
     start = 0 + (page - 1) * 10
@@ -316,7 +338,7 @@ def results(page):
     s = s.highlight('review_count', fragment_size=999999999, number_of_fragments=1)
     # print(len(s))
     response = s[start:end].execute()
-    print(response)
+    # print(response)
     # insert data into response
     resultList = {}
     for hit in response.hits:
@@ -329,8 +351,17 @@ def results(page):
             else:
                 result['name'] = hit.name
 
+            text = nltk.Text(hit.review.split())
+            print(text)
+            print(type(text))
+            findconcordance(text, text_query)
+
+            # match = text.concordance(text_query)
+            # print([text1.tokens[offset + 1] for offset in c.offsets('monstrous')])
+
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
+
             else:
                 result['review'] = hit.review
 
@@ -392,7 +423,7 @@ def results(page):
 
     # get the total number of matching results
     result_num = response.hits.total
-    print(result_num)
+    # print(result_num)
     # if we find the results, extract title and text information from doc_data, else do nothing
     if result_num > 0:
         return render_template('page_SERP.html', mode=mode, results=resultList, res_num=result_num, page_num=page,
@@ -419,6 +450,16 @@ def results(page):
                                queries=shows)
 
 
+def findconcordance(text, text_query):
+    # print(text)
+    # # print(text.concordance_list)
+    # # print(text.find_con)
+    for i in text.concordance_list(text_query,lines=100):
+        surrounding = i.left.extend(i.right)
+        # print(i.left)
+        # print(type(i.left))
+        # print(i.right)
+
 # display a particular document given a result number
 @app.route("/documents/<res>", methods=['GET'])
 def documents(res):
@@ -444,4 +485,4 @@ def documents(res):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

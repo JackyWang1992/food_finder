@@ -97,7 +97,7 @@ def merge():
     # BUSINESS + REVIEW
     curr.execute(
         "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state,"
-        "group_concat(REVIEW.review, ';;;;;'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny), REVIEW.date"
+        "group_concat(REVIEW.review, '\n\n\n\n\n\n'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny), REVIEW.date"
         " FROM BUSINESS, REVIEW "
         " WHERE BUSINESS.business_id = REVIEW.business_id "
         " AND BUSINESS.state = 'AZ'"
