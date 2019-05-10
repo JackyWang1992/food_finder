@@ -34,10 +34,10 @@
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-9" />
-    <option name="width" value="978" />
-    <option name="height" value="1039" />
+  <component name="ProjectFrameBounds">
+    <option name="y" value="23" />
+    <option name="width" value="1246" />
+    <option name="height" value="777" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -122,7 +122,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="wang_j_es" type="Python.FlaskServer">
+    <configuration name="wang_j_es" type="Python.FlaskServer" factoryName="Flask server">
       <module name="wang_j_es" />
       <option name="target" value="$PROJECT_DIR$/query.py" />
       <option name="targetType" value="PATH" />
@@ -137,6 +137,11 @@
       <option name="launchJavascriptDebuger" value="false" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Flask server.wang_j_es" />
+      <item itemvalue="Python.db" />
+      <item itemvalue="Python.index" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.db" />
