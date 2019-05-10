@@ -19,9 +19,13 @@ es = Elasticsearch()
 # You can create a custom analyzer by choosing among elasticsearch options
 # or writing your own functions.
 # Elasticsearch also has default analyzers that might be appropriate.
+my_word_delimiter = token_filter('my_word_delimiter', type='word_delimiter', preserve_original=True, catenate_all=True)
+
 my_analyzer = analyzer('custom1',
                        tokenizer='standard',
-                       filter=['lowercase', 'stop'])
+                       filter=['lowercase', 'stop',my_word_delimiter])
+
+
 
 # --- Add more analyzers here ---
 # use stopwords... or not?
@@ -29,16 +33,16 @@ my_analyzer = analyzer('custom1',
 # the analyzer which tokenize for text, use stopwords stemming, lowercase and ascii-folding
 text_analyzer = analyzer('custom2',
                          tokenizer='letter',
-                         filter=["stop", "lowercase", "porter_stem", "asciifolding"]
+                         filter=["stop", "lowercase", "porter_stem", "asciifolding",my_word_delimiter]
                          )
 # the folding analyzer which only use lowercase and ascii-folding
 folding_analyzer = analyzer('custom3',
                             tokenizer='standard',
-                            filter=["lowercase", "asciifolding"])
+                            filter=["lowercase", "asciifolding",my_word_delimiter])
 # the category analyzer which use lowercase, ascii-folding and stemming
 cat_analyzer = analyzer('custom4',
                         tokenizer='standard',
-                        filter=["lowercase", "asciifolding", "porter_stem"])
+                        filter=["lowercase", "asciifolding", "porter_stem",my_word_delimiter])
 
 
 # Define document mapping (schema) by defining a class as a subclass of Document.
@@ -95,7 +99,7 @@ def buildIndex():
     restaurant_index.create()
 
     # Open the json film corpus
-    with open('ca_business_review.json', 'r', encoding='utf-8') as data_file:
+    with open('az_restaurant_reviews.json', 'r', encoding='utf-8') as data_file:
         # load movies from json file into dictionary
         restaurants = json.load(data_file)
         size = len(restaurants)
