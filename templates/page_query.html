@@ -20,10 +20,12 @@ font-size: 42px;
 }
 
 .searchRest{
-text-align: center;
-float: right;
+position: absolute;
+top:350px;
+right: 50px;
+/*float: right;
 margin-left: 100px;
-margin-right: 40px;
+margin-right: 40px;*/
 }
 
 .searchButton{
@@ -138,12 +140,15 @@ font-size: 14px;
 font-weight: bold;
 margin: 0px;
 padding: 0px;
-float: center;
-margin-left: 84%;
+position: absolute;
+top: 400px;
+right: 65px;
 }
 
 .searchCity {
-margin-left: 83%;
+position: absolute;
+top:10px;
+right:20px;
 font-family: Open Sans;
 font-size: 16px;
 }
@@ -173,18 +178,6 @@ font-size: 16px;
         <div class="tagline"> <span style="color:#DC7633;font-family:Open Sans;font-weight:bold;font-size: 34px; float: left; margin-right:-210px; position: relative; top:-35px;">Hey Arizona, <br> </span> What are you craving?</div>
     	<div class="searchRest">
 			<textarea style="font-family:Open Sans;font-size: 14px;color: #808080;"rows="2" cols="60" name="query">Tacos, burgers, ramen...</textarea>
-                <datalist id="query">
-                        <option value="Phoenix">
-                        <option value="Tuscan">
-                        <option value="Mesa">
-                        <option value="Chandler">
-                        <option value="Gilbert">
-                        <option value="Glendale">
-                        <option value="Scottsdale">
-                        <option value="Maryvale">
-                        <option value="Tempe">
-                        <option value="Peoria">
-                    </datalist>
 			<input class="searchButton" type="submit" value="Find Restauraunts">
 		</div>
 </form>
