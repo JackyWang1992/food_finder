@@ -163,20 +163,24 @@ def results(page):
             text = nltk.Text(hit.review.split())
             findconcordance(text, text_query)
 
-            if 'review' in hit.meta.highlight:
-                result['review'] = hit.meta.highlight.review[0]
-
-            else:
-                result['review'] = hit.review
-
             if 'city' in hit.meta.highlight:
                 result['city'] = hit.meta.highlight.city[0]
             else:
                 result['city'] = hit.city
+
+            if 'star' in hit.meta.highlight:
+                result['star'] = hit.meta.highlight.star[0]
+            else:
+                result['star'] = hit.star
+
+            if 'review' in hit.meta.highlight:
+                result['review'] = hit.meta.highlight.review[0]
+            else:
+                result['review'] = hit.review
         else:
             result['name'] = hit.name
-            result['review'] = hit.review
             result['city'] = hit.city
+            result['review'] = hit.review
 
         resultList[hit.meta.id] = result
 
@@ -233,8 +237,14 @@ def findconcordance(text, text_query):
 @app.route("/documents/<res>", methods=['GET'])
 def documents(res):
     global gresults
+
+    # rest = Restaurant.get(id=res, index='sample_restaurant_index')
+    # rest_dic = rest.to_dict()
+    # restaurant['star'] = str(rest_dic['star'])
+
     restaurant = gresults[res]
     restaurant_name = restaurant['name']
+
     for term in restaurant:
         if type(restaurant[term]) is AttrList:
             s = "\n"
@@ -242,13 +252,10 @@ def documents(res):
                 s += item + ",\n "
             restaurant[term] = s
     # fetch the movie from the elasticsearch index using its id
-    rest = Restaurant.get(id=res, index='sample_restaurant_index')
-    rest_dic = rest.to_dict()
-    restaurant['star'] = str(rest_dic['star'])
-    restaurant['cool'] = str(rest_dic['cool'])
-    restaurant['review_count'] = str(rest_dic['review_count'])
-    restaurant['useful'] = str(rest_dic['useful'])
-    restaurant['funny'] = str(rest_dic['funny'])
+    # restaurant['cool'] = str(rest_dic['cool'])
+    # restaurant['review_count'] = str(rest_dic['review_count'])
+    # restaurant['useful'] = str(rest_dic['useful'])
+    # restaurant['funny'] = str(rest_dic['funny'])
 
     return render_template('page_targetArticle.html', restaurant=restaurant, title=restaurant_name)
 
