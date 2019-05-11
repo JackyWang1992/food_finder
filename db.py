@@ -106,10 +106,14 @@ def merge():
 
     # build training set for naive bayes
     curr.execute(
-        "SELECT REVIEW.review, REVIEW.stars"
+        "SELECT REVIEW.review, "
+        " CASE"
+        " WHEN REVIEW.stars <= 3 THEN 'neg'"
+        " WHEN REVIEW.stars >3 THEN 'pos'"
+        " END as sentiment"
         " FROM BUSINESS, REVIEW"
         " WHERE BUSINESS.business_id = REVIEW.business_id "
-        " AND BUSINESS.state IN ('CA', 'ON', 'NY')"
+        " AND BUSINESS.state IN ('CA', 'NY', 'IL')"
         " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'")
 
     # BUSINESS + TIP
@@ -143,6 +147,7 @@ def merge():
         # dd['funny'] = content[14]
         # dd['date'] = content[15]
 
+        # build training test for naive bayes classifier
         dd['review'] = content[0]
         dd['stars'] = content[1]
 

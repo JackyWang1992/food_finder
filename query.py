@@ -12,11 +12,11 @@ Search DSL:
 https://elasticsearch-dsl.readthedocs.io/en/latest/search_dsl.html
 """
 
-import re
+import re, string
 from flask import *
 from nltk.corpus import stopwords
 import nltk
-from nltk.corpus import PlaintextCorpusReader
+from nltk.corpus import stopwords
 
 from index import Restaurant
 from pprint import pprint
@@ -59,6 +59,8 @@ def search():
 @app.route("/results", defaults={'page': 1}, methods=['GET', 'POST'])
 @app.route("/results/<page>", methods=['GET', 'POST'])
 def results(page):
+    global stopword
+    stopword = set(stopwords.words('english'))
     global tmp_text, phrases  # to store phrases like "philip roth"
     global tmp_address
     global tmp_min_star
@@ -453,14 +455,23 @@ def results(page):
 
 
 def findconcordance(text, text_query):
-    # print(text)
-    # # print(text.concordance_list)
-    # # print(text.find_con)
+    porter = nltk.PorterStemmer()
     for i in text.concordance_list(text_query,lines=100):
-        surrounding = i.left.extend(i.right)
-        # print(i.left)
-        # print(type(i.left))
-        # print(i.right)
+        surrounding = []
+        if i.left is not None:
+            for w in i.left:
+                if w and w not in stopword and w not in string.punctuation:
+                    w = re.sub('(\.|\?|\,|\;|\!)+', '', w)
+                    surrounding.append(porter.stem(w))
+        if i.right is not None:
+            for w in i.right:
+                if w and w not in stopword and w not in string.punctuation:
+                    w = re.sub('(\.|\?|\,|\;|\!)+', '', w)
+                    surrounding.append(porter.stem(w))
+        print(surrounding)
+        # tokens = [porter.stem(w) for w in surrounding if w and w not in stopword and w not in string.punctuation]
+        # print(tokens)
+
 
 # display a particular document given a result number
 @app.route("/documents/<res>", methods=['GET'])
