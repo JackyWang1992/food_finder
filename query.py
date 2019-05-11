@@ -51,7 +51,17 @@ stop_lst = stopwords.words('english')
 
 # display query page
 @app.route("/")
+# @app.route("/")
 def search():
+    # global tmp_text
+    # if request.method == 'POST':
+    #     text_query = request.form['query']
+    #     search = Search(index='sample_restaurant_index')
+    #     s = search.suggest('auto_complete', text_query, completion={'field': 'suggest'})
+    #     response = s.execute()
+    #     suggest = response.suggest.auto_complete[0].options
+    #     return render_template('page_query.html', suggest)
+    # else:
     return render_template('page_query.html')
 
 
@@ -265,7 +275,7 @@ def results(page):
     #     s = s.query('match', address=address_query)
 
     if len(city_query) > 0:
-        s = search.query('match', city=city_query)
+        s = search.query('fuzzy', album_name={'value': city_query, 'transpositions': True})
     else:
         s = search
 
