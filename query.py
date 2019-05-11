@@ -28,24 +28,11 @@ app = Flask(__name__)
 
 # Initialize global variables for rendering page
 tmp_text = ""
-tmp_address = ""
-tmp_max_star = ""
-tmp_min_star = ""
 tmp_city = ""
-tmp_min_review_count = ""
-tmp_max_review_count = ""
-tmp_min_useful = ""
-tmp_max_useful = ""
-tmp_min_cool = ""
-tmp_max_cool = ""
-tmp_min_funny = ""
-tmp_max_funny = ""
 tmp_state = ""
-tmp_review_count = ""
-tmp_date = ""
 gresults = {}
 mode = "text conjunctive"
-stop_lst = stopwords.words('english')
+stop_lst = set(stopwords.words('english'))
 
 
 # display query page
@@ -58,23 +45,10 @@ def search():
 @app.route("/results", defaults={'page': 1}, methods=['GET', 'POST'])
 @app.route("/results/<page>", methods=['GET', 'POST'])
 def results(page):
-    global stopword
-    stopword = set(stopwords.words('english'))
     global tmp_text, phrases  # to store phrases like "philip roth"
-    global tmp_address
     global tmp_min_star
     global tmp_max_star
     global tmp_state
-    global tmp_review_count
-    global tmp_date
-    global tmp_min_review_count
-    global tmp_max_review_count
-    global tmp_min_cool
-    global tmp_max_cool
-    global tmp_min_useful
-    global tmp_max_useful
-    global tmp_min_funny
-    global tmp_max_funny
     global tmp_city
     global gresults
     global mode  # field to store whether we use "Conjunctive" or "Disjunctive" search for text field search
@@ -135,8 +109,7 @@ def results(page):
                 s = s.query('multi_match', query=remaining_text, type='cross_fields', fields=['name', 'review'], operator='and')
         else:
             s = s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='and')
-            print(text_query)
-            # print(hit.text)
+
     start = 0 + (page - 1) * 10
     end = 10 + (page - 1) * 10
 
@@ -153,15 +126,11 @@ def results(page):
     for hit in response.hits:
         result = {}
         result['score'] = hit.meta.score
-
         if 'highlight' in hit.meta:
             if 'name' in hit.meta.highlight:
                 result['name'] = hit.meta.highlight.name[0]
             else:
                 result['name'] = hit.name
-            # used for sentimental analysis
-            text = nltk.Text(hit.review.split())
-            findconcordance(text, text_query)
 
             if 'city' in hit.meta.highlight:
                 result['city'] = hit.meta.highlight.city[0]
@@ -173,6 +142,10 @@ def results(page):
             else:
                 result['star'] = hit.star
 
+            # used for sentimental analysis
+            text = nltk.Text(hit.review.split())
+            findconcordance(text, text_query)
+
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
             else:
@@ -180,6 +153,7 @@ def results(page):
         else:
             result['name'] = hit.name
             result['city'] = hit.city
+            result['star'] = hit.star
             result['review'] = hit.review
 
         resultList[hit.meta.id] = result
@@ -189,7 +163,7 @@ def results(page):
 
     # get the total number of matching results
     result_num = response.hits.total
-    # print(result_num)
+
     # if we find the results, extract title and text information from doc_data, else do nothing
     if result_num > 0:
         return render_template('page_SERP.html', mode=mode, results=resultList, res_num=result_num, page_num=page,
@@ -208,9 +182,6 @@ def results(page):
                     unknowns.append(tokens[i])
             if len(unknowns) > 0:
                 message.append('Unknown search term: ' + ", ".join(unknowns))
-        #
-        # if len(address_query) > 0:
-        #     message.append('Cannot find address: ' + address_query)
 
         return render_template('page_SERP.html', mode=mode, results=message, res_num=result_num, page_num=page,
                                queries=shows)
@@ -221,14 +192,14 @@ def findconcordance(text, text_query):
         surrounding = []
         if i.left is not None:
             for w in i.left:
-                if w and w not in stopword and w not in string.punctuation:
+                if w and w not in stop_lst and w not in string.punctuation:
                     w = re.sub('(\.|\?|\,|\;|\!|\(|\))+', '', w)
-                    surrounding.append(w)
+                    surrounding.append(w.lower())
         if i.right is not None:
             for w in i.right:
-                if w and w not in stopword and w not in string.punctuation:
+                if w and w not in stop_lst and w not in string.punctuation:
                     w = re.sub('(\.|\?|\,|\;|\!|\(|\))+', '', w)
-                    surrounding.append(w)
+                    surrounding.append(w.lower())
         print(surrounding)
 
 
@@ -237,11 +208,6 @@ def findconcordance(text, text_query):
 @app.route("/documents/<res>", methods=['GET'])
 def documents(res):
     global gresults
-
-    # rest = Restaurant.get(id=res, index='sample_restaurant_index')
-    # rest_dic = rest.to_dict()
-    # restaurant['star'] = str(rest_dic['star'])
-
     restaurant = gresults[res]
     restaurant_name = restaurant['name']
 
@@ -251,12 +217,6 @@ def documents(res):
             for item in restaurant[term]:
                 s += item + ",\n "
             restaurant[term] = s
-    # fetch the movie from the elasticsearch index using its id
-    # restaurant['cool'] = str(rest_dic['cool'])
-    # restaurant['review_count'] = str(rest_dic['review_count'])
-    # restaurant['useful'] = str(rest_dic['useful'])
-    # restaurant['funny'] = str(rest_dic['funny'])
-
     return render_template('page_targetArticle.html', restaurant=restaurant, title=restaurant_name)
 
 

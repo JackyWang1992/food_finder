@@ -1,6 +1,7 @@
 # Naive Bayes Classifier for yelp_reviews on surrounding words of keyword
 
 import re, nltk, json, string
+import pickle, os
 import numpy as np
 from collections import defaultdict
 from nltk.corpus import stopwords
@@ -84,7 +85,14 @@ class NaiveBayes():
 if __name__ == '__main__':
     nb = NaiveBayes()
     nb.train()
-    print(nb.prior)
-    print(nb.doc_voc)
-    nb.predict(['magical', 'own', 'Very', 'fresh', 'bagelsfriendly', 'staffseating', 'inside', 'outside', 'I', 'sesame', 'bagel', 'egg', 'bacon', 'fresh', 'delicious', 'They', 'also', 'baked', 'goods', 'well', 'Say', 'oasis'])
+    nb_pickle = pickle.dump(nb, open("nb_pickle", 'wb'))
+
+
+
+
+
+    nb2 = pickle.load(open("nb_pickle", 'rb'))
+    print(nb2.prior)
+    print(nb2.doc_voc)
+    print(nb2.predict(['magical', 'own', 'Very', 'fresh', 'bagelsfriendly', 'staffseating', 'inside', 'outside', 'I', 'sesame', 'bagel', 'egg', 'bacon', 'fresh', 'delicious', 'They', 'also', 'baked', 'goods', 'well', 'Say', 'oasis']))
 
