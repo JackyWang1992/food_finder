@@ -8,6 +8,7 @@ from elasticsearch_dsl import Index, Document, Text, Keyword, Integer, Completio
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl.analysis import tokenizer, analyzer, token_filter
 from elasticsearch_dsl.query import MultiMatch, Match
+from itertools import permutations
 
 # Connect to local host server
 connections.create_connection(hosts=['127.0.0.1'])
@@ -44,13 +45,23 @@ cat_analyzer = analyzer('custom4',
                         tokenizer='standard',
                         filter=["lowercase", "asciifolding", "porter_stem",my_word_delimiter])
 
+ascii_fold = analyzer(
+    'ascii_fold',
+    # we don't want to split O'Brian or Toulouse-Lautrec
+    tokenizer='whitespace',
+    filter=[
+        'lowercase',
+        token_filter('ascii_fold', 'asciifolding')
+    ]
+)
+
 
 # Define document mapping (schema) by defining a class as a subclass of Document.
 # This defines fields and their properties (type and analysis applied).
 # You can use existing es analyzers or use ones you define yourself as above.
 class Restaurant(Document):
-    name = Text(analyzer=text_analyzer)
-    # title_suggest = Completion()  # for autocomplete
+    name = Text(fields={'keyword': Keyword()})
+    suggest = Completion(analyzer=ascii_fold)  # for autocomplete
     review = Text(analyzer=text_analyzer)
     # star = Text(analyzer=folding_analyzer)
     star = Integer()
@@ -63,6 +74,23 @@ class Restaurant(Document):
     address = Keyword()
     date = Keyword()
 
+    def clean(self):
+        """
+        Automatically construct the suggestion input and weight by taking all
+        possible permutation of Restaurant's name as ``input`` and taking their
+        average review stars as ``weight``.
+        """
+        self.suggest = {
+            'input': [' '.join(p) for p in permutations(self.name.split())],
+            'weight': self.star
+        }
+
+    # class Index:
+    #     name = 'test-suggest'
+    #     settings = {
+    #         'number_of_shards': 1,
+    #         'number_of_replicas': 0
+    #     }
     # time = Text(analyzer='simple')
     # categories = Text(analyzer=cat_analyzer)
 
@@ -119,7 +147,7 @@ def buildIndex():
                 "_type": 'doc',
                 "_id": mid - 1,
                 "name": restaurants[str(mid - 1)]['business_name'],
-                # "name_suggest": restaurants[str(mid)]['business_name'],
+                "suggest": restaurants[str(mid - 1)]['business_name'],
                 "review": restaurants[str(mid - 1)]['review'],
                 "address": restaurants[str(mid - 1)]['address'],
                 "city": restaurants[str(mid - 1)]['city'],  # You would like to convert runtime to
