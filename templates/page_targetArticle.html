@@ -1,12 +1,47 @@
 <!doctype html>
-
+<head>
+<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>			
+<link href='https://fonts.googleapis.com/css?family=Open Sans' rel='stylesheet'>		
+<link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>			
+<link href='https://fonts.googleapis.com/css?family=Permanent Marker' rel='stylesheet'>	
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">	
+</head>
 <body bgcolor="white">
+<title>{{title|safe}} Reviews</title>
+<style>
+.restName {
+	margin-bottom: 100px;
+	margin-top: 50px;
+	margin-left: 35%;
+	font-family: Permanent Marker;
+	font-size: 48px;
+	color:white;
+}
 
-<h3>{{title|safe}}</h3>
-<div class="restaurant" style="word-wrap:break-word; padding:10px;">
+.titleBox{
+	width: 100%;
+	background-color:#DC7633;
+	margin: 0;
+	padding:0;
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin-bottom: 100px; 
+}
+
+
+</style>
+
+<div class="titleBox"> 
+	<div class="restName">{{title|safe}}</div>
+</div>
+
+<div class="restaurant" style="margin-top:250px;word-wrap:break-word; padding:10px;">
     {% for term in restaurant %}
-        <pre style="white-space: pre-wrap;"><strong>{{term}}</strong>: {{restaurant[term] | safe}}</pre>
+        <pre style="white-space: pre-wrap;font-family:Open Sans;font-size:12px;"><strong>{{term}}</strong>: {{restaurant[term] | safe}}</pre>
     {% endfor %}
+	
 </div>
 
 </body>
