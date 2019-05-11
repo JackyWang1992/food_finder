@@ -1,5 +1,12 @@
 <!doctype html>
 <html>
+<head>
+<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>			
+<link href='https://fonts.googleapis.com/css?family=Open Sans' rel='stylesheet'>		
+<link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>			
+<link href='https://fonts.googleapis.com/css?family=Permanent Marker' rel='stylesheet'>	
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">	
+</head>
 <body bgcolor="white">
 <title>Search Results</title>
 <style>
@@ -8,14 +15,19 @@
     font-weight: bold;
 }
 
+.restName {
+	font-family: Oswald;
+	font-weight: bold;
+}
+
 p.mode {
     color:grey;
     line-height:20px;
     height:60px;
     overflow:hidden;
-    font-size:14px
+    font-size:14px;
+	font-family: 'Open Sans';
 }
-
 p.results {
     color:grey;
     line-height:20px;
@@ -23,81 +35,73 @@ p.results {
     overflow:hidden;
     font-size:14px
 }
-
 p.cannotfind {
     background-color:pink;
     text-align:center;
     border-left: 6px solid red;
+	font-family: 'Open Sans';
 }
 .header {
     background-color:black;
     color:lightgrey;
 }
 .searchbox {
-    position:fixed;
-    top:0;
     width:100%;
     float:left;
     background-color:white;
-    border-bottom: 2px dotted black;
+    border-top: 2px dotted black;
+	margin-bottom: 20px;
+	font-family: Open Sans;
+	font-size: 10px;
 }
 .contents{
-    margin-top:400px;
+	padding-top:100px;
+    margin-top:100px;
     padding:0;
     clear:left;
 }
+
+.titleBox{
+	width: 100%;
+	background-color:#DC7633;
+	margin: 0;
+	padding:0;
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin-bottom: 100px; 
+}
+
+.title{
+	margin-bottom: 100px;
+	margin-top: 50px;
+	margin-left: 45%;
+	font-family: Permanent Marker;
+	font-size: 48px;
+	color:white;
+}
+
+.nextButton{
+	width:60px;
+	float:left;
+	background-color:#DC7633;
+	color:white;
+	font-family:Open Sans;
+	border:none;
+}
+
+.nextButton:hover{
+	cursor: pointer;
+	background-color: #C14A1E;
+}
 </style>
 
-<div class="searchbox">
-<h3 class="header"> Find Food Search </h3>
-
-<form action="/results" name="search" method="post">
-<dl>
-    <p>Free text search:</p>
-        <dd><textarea rows="2" cols="100" name="query">{{queries['query']}}</textarea>
-{#        <dd>Search in address: <input type="text" style="width:300px" name="address" value="{{queries['address']}}">#}
-        <dd>Search in city: <input list="city" name="city" value="{{queries['city']}}">
-                            <datalist id="city">
-                                <option value="Chandler">
-                                <option value="Scottsdale">
-                                <option value="Mesa">
-                                <option value="Phoenix">
-                                <option value="Dublin">
-                                <option value="Los Angeles">
-                                <option value="Monterey Park">
-                                <option value="San Diego">
-                                <option value="Sacramento">
-                            </datalist>
-{#        <dd>State search: <input list="state" name="state" value="{{queries['state']}}">#}
-{#                            <datalist id="state">#}
-{#                                <option value="CA">#}
-{#                                <option value="AZ">#}
-{#                            </datalist>#}
-{#        <dd>Review Count: min <input type="text" name="min_review" value="{{queries['min_review']}}"> max <input type="text" name="max_review" value="{{queries['max_review']}}">#}
-{#        <dd>Stars: min <input type="text" name="min_star" value="{{queries['min_star']}}"> max <input type="text" name="max_star" value="{{queries['max_star']}}">#}
-{#        <dd>Useful: min <input type="text" name="min_useful" value="{{queries['min_useful']}}"> max <input type="text" name="max_useful" value="{{queries['max_useful']}}">#}
-{#        <dd>Cool: min <input type="text" name="min_cool" value="{{queries['min_cool']}}"> max <input type="text" name="max_cool" value="{{queries['max_cool']}}">#}
-{#        <dd>Funny: min <input type="text" name="min_funny" value="{{queries['min_funny']}}"> max <input type="text" name="max_funny" value="{{queries['max_funny']}}">#}
-{#        <dd>Date search: <input type="text" style="width:300px" name="date" value="{{queries['date']}}">#}
-        <dd><input type="submit" value="Search">
-</dl>
-</form>
-
-<p style="font-size:14px">Mode: {{mode}}. Found {{res_num}} results. Showing {{ 1+(page_num-1)*10 }} - {% if (10+(page_num-1)*10) > res_num %}{{res_num}}{% else %}{{ 10+(page_num-1)*10 }}{% endif %}</p>
-{% if page_num > 1 %}
-    <form action="/results/{{page_num-1}}" name="previouspage" method="get">
-    <input style="width:60px;float:left;clear:right" type="submit" value="Previous">
-    </form>
-{% endif %}
-{% if ((res_num/10)|round(0,'ceil')) > page_num %}
-    <form action="/results/{{page_num+1}}" name="nextpage" method="get">
-    <input style="width:60px;float:left" type="submit" value="Next">
-    </form>
-{% endif %}
-
+<div class="titleBox"> 
+	<div class="title">Results</div>
 </div>
 
-<div class="contents">
+<div class="contents" style="padding-top:150px;">
 <p>
     {% if stop_len %}
         Ignoring term:
@@ -109,15 +113,30 @@ p.cannotfind {
     {% if res_num %}
         {% for res in results %}
         <ul>
-            <pre class="sansserif"><a href="/documents/{{res}}" target="_blank">  {{ results[res]['name']|safe }} </a>    score: {{results[res]['score']}} </pre>
-            <p class="results">{{results[res]['review'] | safe}}</p>
+            <pre class="restName"><a href="/documents/{{res}}" style="color:black;text-decoration:none;" target="_blank">  {{ results[res]['name']|safe }} </a> <span style="font-size: 12px; font-family: Open Sans; font-weight:normal;">Food<span style="color:#EF3E36; font-weight:bold;">Advisor</span> Score: {{results[res]['score']}} </span></pre>
+            <p class="results" style="font-family:Open Sans; font-size:12px;">{{results[res]['review'] | safe}}</p>
         </ul>
         {% endfor %}
     {% else %}
         {% for res in results %}
             <p class="cannotfind">{{res}}</p>
         {% endfor %}
-    {% endif %}
+    {% endif %}  
 </div>
+
+<div class="searchbox">
+<p style="font-size:12px">Mode: {{mode}}. Found {{res_num}} results. Showing {{ 1+(page_num-1)*10 }} - {% if (10+(page_num-1)*10) > res_num %}{{res_num}}{% else %}{{ 10+(page_num-1)*10 }}{% endif %}</p>
+{% if page_num > 1 %}
+    <form action="/results/{{page_num-1}}" name="previouspage" method="get">
+    <input class="nextButton" style="width:60px;float:left;clear:right;padding-right:20px;" type="submit" value="Previous">
+    </form>
+{% endif %}
+{% if ((res_num/10)|round(0,'ceil')) > page_num %}
+    <form action="/results/{{page_num+1}}" name="nextpage" method="get">
+    <input class="nextButton" type="submit" value="Next">
+    </form>
+{% endif %}
+</div>
+
 </body>
 </html>
