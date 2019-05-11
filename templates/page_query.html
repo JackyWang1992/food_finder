@@ -1,48 +1,262 @@
 <!doctype html>
-
+<head>
+<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>			
+<link href='https://fonts.googleapis.com/css?family=Open Sans' rel='stylesheet'>		
+<link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>			
+<link href='https://fonts.googleapis.com/css?family=Permanent Marker' rel='stylesheet'>	
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">	
+</head>
 <body bgcolor="white">
-<title>Food Find search page!</title>
+<title>FoodAdvisor</title>
 <style>
-dd {
-    width:100%
+.tagline{
+float: right;
+text-align: center;
+margin-right: 170px;
+margin-top: 250px;
+margin-bottom: 5px;
+font-family: Permanent Marker;
+font-size: 42px;
 }
+
+.searchRest{
+text-align: center;
+float: right;
+margin-left: 100px;
+margin-right: 40px;
+}
+
+.searchButton{
+position: relative;
+top: -16px;
+left: -15px;
+height: 44px;
+background-color: #EF3E36;
+color: white;
+border-width: 0px;
+font-weight: bold;
+font-family: Open Sans;
+font-size: 14px;
+}
+
+.searchButton:hover{
+background-color: #ce3831;
+cursor: pointer;
+}
+
+.pictureTag{
+font-family: Permanent Marker;
+font-size: 62px;
+color: black;
+float: left;
+}
+
+
+.pictures{
+position: absolute;
+margin: 0px;
+top: 0px;
+left: 0px;
+z-index: -100px;
+}
+
+* {box-sizing: border-box;}
+body {font-family: Verdana, sans-serif;}
+.mySlides {display: none;}
+img {vertical-align: middle;}
+
+/* Slideshow container */
+.slideshow-container {
+  max-width: 1000px;
+  position: relative;
+  margin: auto;
+  z-index: -100px;
+}
+
+/* Caption text */
+.text {
+  color: #f2f2f2;
+  font-size: 15px;
+  padding: 8px 12px;
+  position: absolute;
+  bottom: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Number text (1/3 etc) */
+.numbertext {
+  color: #f2f2f2;
+  font-size: 12px;
+  padding: 8px 12px;
+  position: absolute;
+  top: 0;
+  display:none;
+}
+
+/* The dots/bullets/indicators */
+.dot {
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+.active {
+  background-color: #717171;
+}
+
+/* Fading animation */
+.fade {
+  -webkit-animation-name: fade;
+  -webkit-animation-duration: 1.5s;
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
+
+@-webkit-keyframes fade {
+  from {opacity: .4} 
+  to {opacity: 1}
+}
+
+@keyframes fade {
+  from {opacity: .4} 
+  to {opacity: 1}
+}
+
+/* On smaller screens, decrease text size */
+@media only screen and (max-width: 300px) {
+  .text {font-size: 11px}
+}
+
+.companyName{
+font-family: 'Open Sans';
+font-size: 14px;
+font-weight: bold;
+margin: 0px;
+padding: 0px;
+float: center;
+margin-left: 84%;
+}
+
+.searchCity {
+margin-left: 83%;
+font-family: Open Sans;
+font-size: 16px;
+}
+
 </style>
+
+
 <div style="width:100%">
-<h3 style="background-color:black;color:lightgrey"> Food Find Search </h3>
-
-<img src="https://i.ibb.co/zSwnNtG/food-finder-thumbnail.png" alt="drawing" width="40"/><h1>Food Find search page</h1>
-
 
 <form action="/results" name="search" method="post">
-    <dl>
-        <p>Free text search:</p>
-        <dd><textarea rows="2" cols="100" name="query"></textarea>
-{#        <dd>Search in address: <input type="text" style="width:300px" name="address">#}
-        <dd>Search in city: <input list="city" name="city">
-                            <datalist id="city">
-                                <option value="Chandler">
-                                <option value="Scottsdale">
-                                <option value="Mesa">
-                                <option value="Phoenix">
-                                <option value="Dublin">
-                                <option value="Los Angeles">
-                                <option value="Monterey Park">
-                                <option value="San Diego">
-                                <option value="Sacramento">
-                            </datalist>
-{#        <dd>State search: <input list="state" name="state">#}
-{#                            <datalist id="state">#}
-{#                                <option value="CA">#}
-{#                                <option value="AZ">#}
-{#                            </datalist>#}
-{#        <dd>Review Count: min <input type="text" name="min_review"> max <input type="text" name="max_review">#}
-{#        <dd>Stars: min <input type="text" name="min_star"> max <input type="text" name="max_star">#}
-{#        <dd>Useful: min <input type="text" name="min_useful"> max <input type="text" name="max_useful">#}
-{#        <dd>Cool: min <input type="text" name="min_cool"> max <input type="text" name="max_cool">#}
-{#        <dd>Funny: min <input type="text" name="min_funny"> max <input type="text" name="max_funny">#}
-{#        <dd>Date search: <input type="text" style="width:300px" name="date">#}
-        <dd><input type="submit" value="Search">
-    </dl>
+	<div class="searchCity">	
+		<i class="fa fa-map-marker" aria-hidden="true" style="color:#DC7633;"></i>
+			<input list="city" name="city">
+				<datalist id="city">
+					<option value="Phoenix">
+					<option value="Tuscan">
+					<option value="Mesa">
+					<option value="Chandler">
+					<option value="Gilbert">
+					<option value="Glendale">
+					<option value="Scottsdale">
+					<option value="Maryvale">
+					<option value="Tempe">
+					<option value="Peoria">
+                </datalist>
+		</div>
+        <div class="tagline"> <span style="color:#DC7633;font-family:Open Sans;font-weight:bold;font-size: 34px; float: left; margin-right:-210px; position: relative; top:-35px;">Hey Arizona, <br> </span> What are you craving?</div>
+    	<div class="searchRest">
+			<textarea style="font-family:Open Sans;font-size: 14px;color: #808080;"rows="2" cols="60" name="query">Tacos, burgers, ramen...</textarea>
+			<input class="searchButton" type="submit" value="Find Restauraunts">
+		</div>
 </form>
+
+	<div class="companyName"><span style="font-size:12px;font-weight:normal;">Powered by</span> Food<span style="color:#EF3E36;">Advisor</span></div>
+	
+							
+		<div class="pictures">
+			<div class="mySlides fade">
+			  <div class="numbertext">1 / 10</div>
+			  <img src="https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" style="width:600px;height:577px;object-fit:cover;">
+			</div>
+
+			<div class="mySlides fade">
+			  <div class="numbertext">2 / 10</div>
+			  <img src="https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" style="width:600px;height:577px;object-fit:cover;">
+			</div>
+
+			<div class="mySlides fade">
+			  <div class="numbertext">3 / 10</div>
+			  <img src="https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
+			</div>
+			
+			<div class="mySlides fade">
+			  <div class="numbertext">4 / 10</div>
+			  <img src="https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
+			</div>
+
+			<div class="mySlides fade">
+			  <div class="numbertext">5 / 10</div>
+			  <img src="https://images.pexels.com/photos/5938/food-salad-healthy-lunch.jpg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
+			</div>
+
+			<div class="mySlides fade">
+			  <div class="numbertext">6 / 10</div>
+			  <img src="https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
+			</div>
+			
+			<div class="mySlides fade">
+			  <div class="numbertext">7 / 10</div>
+			  <img src="https://images.pexels.com/photos/7048/food-art-sugar-display.jpg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
+			</div>
+
+			<div class="mySlides fade">
+			  <div class="numbertext">8 / 10</div>
+			  <img src="https://images.pexels.com/photos/884600/pexels-photo-884600.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
+			</div>
+
+			<div class="mySlides fade">
+			  <div class="numbertext">9 / 10</div>
+			  <img src="https://images.pexels.com/photos/1098599/pexels-photo-1098599.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
+			</div>
+
+			<div class="mySlides fade">
+			  <div class="numbertext">10 / 10</div>
+			  <img src="https://images.pexels.com/photos/359993/pexels-photo-359993.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
+			</div>
+		</div>
+
+</div>
+		
+		<br>
+		
+		<script>
+		var slideIndex = 0;
+		showSlides();
+
+		function showSlides() {
+		  var i;
+		  var slides = document.getElementsByClassName("mySlides");
+		  //var dots = document.getElementsByClassName("dot");
+		  for (i = 0; i < slides.length; i++) {
+			slides[i].style.display = "none";  
+		  }
+		  slideIndex++;
+		  if (slideIndex > slides.length) {slideIndex = 1}    
+		  /*for (i = 0; i < dots.length; i++) {
+			dots[i].className = dots[i].className.replace(" active", "");
+		  }*/
+		  slides[slideIndex-1].style.display = "block";  
+		  //dots[slideIndex-1].className += " active";
+		  setTimeout(showSlides, 6000); // Change image every 6 seconds
+		}
+		</script>
+
 </div>
 </body>
