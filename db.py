@@ -95,22 +95,23 @@ def merge():
     conn = sqlite3.connect("yelp1.db")
     curr = conn.cursor()
     # BUSINESS + REVIEW
-    curr.execute(
-        "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state,"
-        "group_concat(REVIEW.review, '\n\n\n\n\n\n'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny), REVIEW.date"
-        " FROM BUSINESS, REVIEW "
-        " WHERE BUSINESS.business_id = REVIEW.business_id "
-        " AND BUSINESS.state = 'AZ'"
-        " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'"
-        " GROUP BY BUSINESS.business_id")
-
     # curr.execute(
-        # "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state,"
-        # "REVIEW.review,REVIEW.useful, REVIEW.cool, REVIEW.funny, REVIEW.date, REVIEW.review_id"
-        # " FROM BUSINESS, REVIEW"
-        # " WHERE BUSINESS.business_id = REVIEW.business_id "
-        # " AND BUSINESS.state = 'AZ'"
-        # " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'")
+    #     "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state,"
+    #     "group_concat(REVIEW.review, '\n\n\n\n\n\n'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny), REVIEW.date"
+    #     " FROM BUSINESS, REVIEW "
+    #     " WHERE BUSINESS.business_id = REVIEW.business_id "
+    #     " AND BUSINESS.state = 'AZ'"
+    #     " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'"
+    #     " GROUP BY BUSINESS.business_id")
+
+    # build training set for naive bayes
+    curr.execute(
+        "SELECT REVIEW.review, REVIEW.stars"
+        " FROM BUSINESS, REVIEW"
+        " WHERE BUSINESS.business_id = REVIEW.business_id "
+        " AND BUSINESS.state IN ('CA', 'ON', 'NY')"
+        " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'")
+
     # BUSINESS + TIP
     # curr.execute(
     #     "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state,"
@@ -125,22 +126,26 @@ def merge():
     # convert to dict
     for content in curr.fetchall():
         dd = {}
-        dd['business_id'] = content[0]
-        dd['business_name'] = content[1]
-        dd['address'] = content[2]
-        dd['attributes'] = content[3]
-        dd['categories'] = content[4]
-        dd['city'] = content[5]
-        dd['hours'] = content[6]
-        dd['postal_code'] = content[7]
-        dd['review_count'] = content[8]
-        dd['stars'] = content[9]
-        dd['state'] = content[10]
-        dd['review'] = content[11]
-        dd['useful'] = content[12]
-        dd['cool'] = content[13]
-        dd['funny'] = content[14]
-        dd['date'] = content[15]
+        # dd['business_id'] = content[0]
+        # dd['business_name'] = content[1]
+        # dd['address'] = content[2]
+        # dd['attributes'] = content[3]
+        # dd['categories'] = content[4]
+        # dd['city'] = content[5]
+        # dd['hours'] = content[6]
+        # dd['postal_code'] = content[7]
+        # dd['review_count'] = content[8]
+        # dd['stars'] = content[9]
+        # dd['state'] = content[10]
+        # dd['review'] = content[11]
+        # dd['useful'] = content[12]
+        # dd['cool'] = content[13]
+        # dd['funny'] = content[14]
+        # dd['date'] = content[15]
+
+        dd['review'] = content[0]
+        dd['stars'] = content[1]
+
         # dd['review_id'] = content[16]
         final[i] = dd
         i += 1

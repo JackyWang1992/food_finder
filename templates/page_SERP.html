@@ -55,7 +55,7 @@ p.cannotfind {
 <dl>
     <p>Free text search:</p>
         <dd><textarea rows="2" cols="100" name="query">{{queries['query']}}</textarea>
-        <dd>Search in address: <input type="text" style="width:300px" name="address" value="{{queries['address']}}">
+{#        <dd>Search in address: <input type="text" style="width:300px" name="address" value="{{queries['address']}}">#}
         <dd>Search in city: <input list="city" name="city" value="{{queries['city']}}">
                             <datalist id="city">
                                 <option value="Chandler">
@@ -68,17 +68,17 @@ p.cannotfind {
                                 <option value="San Diego">
                                 <option value="Sacramento">
                             </datalist>
-        <dd>State search: <input list="state" name="state" value="{{queries['state']}}">
-                            <datalist id="state">
-                                <option value="CA">
-                                <option value="AZ">
-                            </datalist>
-        <dd>Review Count: min <input type="text" name="min_review" value="{{queries['min_review']}}"> max <input type="text" name="max_review" value="{{queries['max_review']}}">
-        <dd>Stars: min <input type="text" name="min_star" value="{{queries['min_star']}}"> max <input type="text" name="max_star" value="{{queries['max_star']}}">
-        <dd>Useful: min <input type="text" name="min_useful" value="{{queries['min_useful']}}"> max <input type="text" name="max_useful" value="{{queries['max_useful']}}">
-        <dd>Cool: min <input type="text" name="min_cool" value="{{queries['min_cool']}}"> max <input type="text" name="max_cool" value="{{queries['max_cool']}}">
-        <dd>Funny: min <input type="text" name="min_funny" value="{{queries['min_funny']}}"> max <input type="text" name="max_funny" value="{{queries['max_funny']}}">
-        <dd>Date search: <input type="text" style="width:300px" name="date" value="{{queries['date']}}">
+{#        <dd>State search: <input list="state" name="state" value="{{queries['state']}}">#}
+{#                            <datalist id="state">#}
+{#                                <option value="CA">#}
+{#                                <option value="AZ">#}
+{#                            </datalist>#}
+{#        <dd>Review Count: min <input type="text" name="min_review" value="{{queries['min_review']}}"> max <input type="text" name="max_review" value="{{queries['max_review']}}">#}
+{#        <dd>Stars: min <input type="text" name="min_star" value="{{queries['min_star']}}"> max <input type="text" name="max_star" value="{{queries['max_star']}}">#}
+{#        <dd>Useful: min <input type="text" name="min_useful" value="{{queries['min_useful']}}"> max <input type="text" name="max_useful" value="{{queries['max_useful']}}">#}
+{#        <dd>Cool: min <input type="text" name="min_cool" value="{{queries['min_cool']}}"> max <input type="text" name="max_cool" value="{{queries['max_cool']}}">#}
+{#        <dd>Funny: min <input type="text" name="min_funny" value="{{queries['min_funny']}}"> max <input type="text" name="max_funny" value="{{queries['max_funny']}}">#}
+{#        <dd>Date search: <input type="text" style="width:300px" name="date" value="{{queries['date']}}">#}
         <dd><input type="submit" value="Search">
 </dl>
 </form>
