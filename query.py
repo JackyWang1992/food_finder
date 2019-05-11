@@ -274,8 +274,9 @@ def results(page):
     # if len(address_query) > 0:
     #     s = s.query('match', address=address_query)
 
+    # fuzzy search on cities field
     if len(city_query) > 0:
-        s = search.query('fuzzy', album_name={'value': city_query, 'transpositions': True})
+        s = search.query('fuzzy', city={'value': city_query, 'transpositions': True})
     else:
         s = search
 
