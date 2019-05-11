@@ -16,7 +16,6 @@ import re, string
 from flask import *
 from nltk.corpus import stopwords
 import nltk
-from nltk.corpus import PlaintextCorpusReader
 
 from index import Restaurant
 from pprint import pprint
@@ -160,10 +159,8 @@ def results(page):
                 result['name'] = hit.meta.highlight.name[0]
             else:
                 result['name'] = hit.name
-
+            # used for sentimental analysis
             text = nltk.Text(hit.review.split())
-            print(text)
-            print(type(text))
             findconcordance(text, text_query)
 
             if 'review' in hit.meta.highlight:
@@ -171,6 +168,11 @@ def results(page):
 
             else:
                 result['review'] = hit.review
+
+            if 'city' in hit.meta.highlight:
+                result['city'] = hit.meta.highlight.city[0]
+            else:
+                result['city'] = hit.city
         else:
             result['name'] = hit.name
             result['review'] = hit.review
@@ -211,22 +213,20 @@ def results(page):
 
 
 def findconcordance(text, text_query):
-    porter = nltk.PorterStemmer()
-    for i in text.concordance_list(text_query,lines=100):
+    for i in text.concordance_list(text_query,lines=10000):
         surrounding = []
         if i.left is not None:
             for w in i.left:
                 if w and w not in stopword and w not in string.punctuation:
-                    w = re.sub('(\.|\?|\,|\;|\!)+', '', w)
-                    surrounding.append(porter.stem(w))
+                    w = re.sub('(\.|\?|\,|\;|\!|\(|\))+', '', w)
+                    surrounding.append(w)
         if i.right is not None:
             for w in i.right:
                 if w and w not in stopword and w not in string.punctuation:
-                    w = re.sub('(\.|\?|\,|\;|\!)+', '', w)
-                    surrounding.append(porter.stem(w))
+                    w = re.sub('(\.|\?|\,|\;|\!|\(|\))+', '', w)
+                    surrounding.append(w)
         print(surrounding)
-        # tokens = [porter.stem(w) for w in surrounding if w and w not in stopword and w not in string.punctuation]
-        # print(tokens)
+
 
 
 # display a particular document given a result number

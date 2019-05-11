@@ -38,7 +38,7 @@ class NaiveBayes():
     def train(self):
         # iterate over training documents
         num_res = defaultdict(int)
-        with open('trainset4.json', 'r', encoding='utf-8') as data_file:
+        with open('nb_trainset.json', 'r', encoding='utf-8') as data_file:
             restaurants = json.load(data_file)
             porter = nltk.PorterStemmer()
             # collect pos/neg class count and feature counts
@@ -48,7 +48,7 @@ class NaiveBayes():
                 review = re.sub('-', ' ', review)
                 review = re.sub('\.', '', review)
                 tokens = word_tokenize(review)
-                tokens = [porter.stem(w) for w in tokens if w and w not in self.stopword and w not in string.punctuation ]
+                tokens = [w for w in tokens if w and w not in self.stopword and w not in string.punctuation ]
                 self.vocabulary = self.vocabulary | set(tokens)
                 if content['stars'] == 'neg':
                     num_res[0] += 1
@@ -56,7 +56,6 @@ class NaiveBayes():
                 elif content['stars'] == 'pos':
                     num_res[1] += 1
                     self.doc_voc[1].extend(tokens)
-            print(self.vocabulary)
             for i in self.feature_dict:
                 for j in self.class_dict:
                     wcount = self.doc_voc[j].count(self.feature_dict[i])
@@ -79,7 +78,6 @@ class NaiveBayes():
         for i in range(len(self.prior)):
             prob[i][0] = prob[i][0] + self.prior[i]
         # calculate the probability between 0-1, 0 as neg and 1 as pos
-        print(np.argmax(prob))
         return np.argmax(prob)
 
 
@@ -88,7 +86,5 @@ if __name__ == '__main__':
     nb.train()
     print(nb.prior)
     print(nb.doc_voc)
-    nb.predict(['25', 'year', 'arizona', 'I', 'dare', 'find', 'better', 'the', 'mani', 'differ', 'choic', 'cream', 'wonder', 'make', 'ole', 'everyth', 'bagel', 'new', 'time', 'It', 'realli', 'hard', 'pick'])
-    nb.predict(['magic', 'own', 'veri', 'fresh', 'bagelsfriendli', 'staffseat', 'insid', 'outsid', 'I', 'sesam', 'bagel', 'egg', 'bacon', 'fresh', 'delici', 'they', 'also', 'bake', 'good', 'well', 'say', 'oasi'])
-
+    nb.predict(['magical', 'own', 'Very', 'fresh', 'bagelsfriendly', 'staffseating', 'inside', 'outside', 'I', 'sesame', 'bagel', 'egg', 'bacon', 'fresh', 'delicious', 'They', 'also', 'baked', 'goods', 'well', 'Say', 'oasis'])
 
