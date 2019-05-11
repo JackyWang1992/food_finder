@@ -5,9 +5,10 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ca_business_review.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/ca_business_tip.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/naivebayes.py" beforeDir="false" afterPath="$PROJECT_DIR$/naivebayes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/query.py" beforeDir="false" afterPath="$PROJECT_DIR$/query.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.py" beforeDir="false" afterPath="$PROJECT_DIR$/index.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/page_SERP.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/page_SERP.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/page_query.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/page_query.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/page_targetArticle.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/page_targetArticle.html" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -69,6 +70,11 @@
           <entry key="SQL" value="4" />
         </counts>
       </usages-collector>
+      <usages-collector id="statistics.vcs.git.usages">
+        <counts>
+          <entry key="git.branch.checkout.remote" value="2" />
+        </counts>
+      </usages-collector>
     </session>
   </component>
   <component name="FileEditorManager">
@@ -76,8 +82,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/index.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="173">
-              <caret line="104" column="31" selection-start-line="101" selection-start-column="3" selection-end-line="104" selection-end-column="31" />
+            <state relative-caret-position="761">
+              <caret line="132" column="31" selection-start-line="132" selection-start-column="31" selection-end-line="132" selection-end-column="31" />
               <folding>
                 <element signature="e#0#11#0" expanded="true" />
               </folding>
@@ -85,14 +91,14 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/query.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="274">
-              <caret line="468" column="50" selection-start-line="468" selection-start-column="50" selection-end-line="468" selection-end-column="50" />
+            <state relative-caret-position="117">
+              <caret line="278" lean-forward="true" selection-start-line="278" selection-end-line="278" />
               <folding>
                 <element signature="e#489#506#0" expanded="true" />
-                <marker date="1557608197883" expanded="true" signature="17326:18115" ph="..." />
+                <marker date="1557608417317" expanded="true" signature="18113:18115" ph="..." />
               </folding>
             </state>
           </provider>
@@ -107,11 +113,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/naivebayes.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="177">
-              <caret line="91" column="211" selection-start-line="91" selection-start-column="211" selection-end-line="91" selection-end-column="211" />
+            <state relative-caret-position="286">
+              <caret line="94" lean-forward="true" selection-start-line="94" selection-end-line="94" />
               <folding>
                 <element signature="e#75#104#0" expanded="true" />
               </folding>
@@ -188,9 +194,9 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="229" />
+    <option name="x" value="35" />
     <option name="y" value="23" />
-    <option name="width" value="978" />
+    <option name="width" value="1172" />
     <option name="height" value="777" />
   </component>
   <component name="ProjectView">
@@ -391,16 +397,15 @@
     <option name="totallyTimeSpent" value="10975000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="229" y="23" width="978" height="777" extended-state="0" />
-    <editor active="true" />
+    <frame x="35" y="23" width="1172" height="777" extended-state="1" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25641027" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21238938" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Concurrent Activities Diagram" order="0" weight="0.32884902" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Find" order="2" weight="0.32892805" />
-      <window_info active="true" anchor="bottom" id="Run" order="3" visible="true" weight="0.3826607" />
+      <window_info active="true" anchor="bottom" id="Run" order="3" sideWeight="0.49911505" visible="true" weight="0.3826607" />
       <window_info anchor="bottom" id="Debug" order="4" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
@@ -408,7 +413,7 @@
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="9" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info anchor="bottom" id="Event Log" order="11" side_tool="true" />
+      <window_info anchor="bottom" id="Event Log" order="11" sideWeight="0.50088495" side_tool="true" weight="0.3826607" />
       <window_info anchor="bottom" id="Terminal" order="12" weight="0.32884902" />
       <window_info anchor="bottom" id="Python Console" order="13" weight="0.32884902" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -493,8 +498,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/index.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="173">
-          <caret line="104" column="31" selection-start-line="101" selection-start-column="3" selection-end-line="104" selection-end-column="31" />
+        <state relative-caret-position="761">
+          <caret line="132" column="31" selection-start-line="132" selection-start-column="31" selection-end-line="132" selection-end-column="31" />
           <folding>
             <element signature="e#0#11#0" expanded="true" />
           </folding>
@@ -575,23 +580,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/query.py">
+    <entry file="file://$PROJECT_DIR$/naivebayes.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="468" column="50" selection-start-line="468" selection-start-column="50" selection-end-line="468" selection-end-column="50" />
+        <state relative-caret-position="286">
+          <caret line="94" lean-forward="true" selection-start-line="94" selection-end-line="94" />
           <folding>
-            <element signature="e#489#506#0" expanded="true" />
-            <marker date="1557608197883" expanded="true" signature="17326:18115" ph="..." />
+            <element signature="e#75#104#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/naivebayes.py">
+    <entry file="file://$PROJECT_DIR$/query.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="177">
-          <caret line="91" column="211" selection-start-line="91" selection-start-column="211" selection-end-line="91" selection-end-column="211" />
+        <state relative-caret-position="117">
+          <caret line="278" lean-forward="true" selection-start-line="278" selection-end-line="278" />
           <folding>
-            <element signature="e#75#104#0" expanded="true" />
+            <element signature="e#489#506#0" expanded="true" />
+            <marker date="1557608417317" expanded="true" signature="18113:18115" ph="..." />
           </folding>
         </state>
       </provider>
