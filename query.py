@@ -60,6 +60,7 @@ def results(page):
         page = int(page.encode('utf-8'))
         # if the method of request is post (for initial query), store query in local global variables
     # if the method of request is get (for "next" results), extract query contents from client's global variables  
+
     if request.method == 'POST':
         text_query = request.form['query']
         phrases = re.findall(r"\"(.*?)\"", text_query)  # get specific phrases from query text
@@ -138,12 +139,19 @@ def results(page):
     # response = s[0:total].execute()
 
     heap = []
+    resultList = {}
+    count_score = 1
+    max_score = 0
     for hit in response.hits:
         result = {}
+        if count_score == 1:
+            max_score = hit.meta.score
+        count_score += 1
         text = nltk.Text(hit.review.split())
         # here, return the score of positive reviews/total reviews
         sentiment_score = find_concordance_sentiment(text, text_query)
-        hit.meta.score = hit.meta.score * sentiment_score
+        # hit.meta.score = hit.meta.score * sentiment_score
+        hit.meta.score = calc_score(hit.meta.score, hit.star,sentiment_score, 0, max_score)
         result['score'] = hit.meta.score
 
         if 'highlight' in hit.meta:
@@ -172,16 +180,6 @@ def results(page):
             else:
                 result['address'] = hit.address
 
-            # used for sentimental analysis
-            text = nltk.Text(hit.review.split())
-            # here, return the score of positive reviews/total reviews
-            sentiment_score = find_concordance_sentiment(text, text_query)
-			
-			##STILL PLAYING AROUND!
-            result['fa_score'] = result['score'] + sentiment_score + (result['star']/result['score'])
-            #hit.meta.score = result['score']
-            #print(result['score'])
-
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
             else:
@@ -194,10 +192,12 @@ def results(page):
             result['address'] = hit.address
             result['review'] = hit.review
         heap.append((hit.meta.score, hit.meta.id, result))
-    heap = sorted(heap, key= lambda x:x[0], reverse=True)
-    resultList = {}
-    for element in heap[start:end]:
+        resultList[hit.meta.id] = result
+    heap = sorted(heap, key=lambda x:x[0], reverse=True)
+
+    for element in heap:
         resultList[element[1]] = element[2]
+    # print(resultList)
 
     # make the result list available globally
     gresults = resultList
@@ -227,6 +227,14 @@ def results(page):
         return render_template('page_SERP.html', mode=mode, results=message, res_num=result_num, page_num=page,
                                queries=shows)
 
+
+def calc_score(base_score, star, sentiment, min_score, max_score):
+    min_rescale = 0
+    max_rescale = 1
+    scale_factor = float((max_rescale - min_rescale) /(max_score - min_score))
+    scaled_base_score = scale_factor * (base_score - max_score) + max_rescale
+    score = scaled_base_score + sentiment + star
+    return score
 
 '''
 Runs the classifier on all the surrounding text of a query keyword
@@ -259,7 +267,7 @@ def find_concordance_sentiment(text, text_query):
 
 
 @app.route("/nearby", defaults={'page': 1}, methods=['GET', 'POST'])
-@app.route("/nearby/<page>", methods=['GET', 'POST'])
+@app.route("/nearby/<page>", methods=['GET','POST'])
 def nearby(page):
     global tmp_text
     global tmp_city
@@ -289,7 +297,7 @@ def nearby(page):
     else:
         s = search
 
-        # highlight
+    # highlight
     s = s.highlight_options(pre_tags='<mark>', post_tags='</mark>')
     s = s.highlight('name', fragment_size=999999999, number_of_fragments=1)
     s = s.highlight('review', fragment_size=999999999, number_of_fragments=1)
@@ -347,7 +355,7 @@ def nearby(page):
         resultList[hit.meta.id] = result
 
     # make the result list available globally
-    gresults = resultList
+    gresults.update(resultList)
 
     # get the total number of matching results
     result_num = response.hits.total
