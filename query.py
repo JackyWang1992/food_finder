@@ -146,6 +146,16 @@ def results(page):
             else:
                 result['star'] = hit.star
 
+            if 'postcode' in hit.meta.highlight:
+                result['postcode'] = hit.meta.highlight.postcode[0]
+            else:
+                result['postcode'] = hit.postcode
+
+            if 'address' in hit.meta.highlight:
+                result['address'] = hit.meta.highlight.address[0]
+            else:
+                result['address'] = hit.address
+
             # used for sentimental analysis
             text = nltk.Text(hit.review.split())
             # here, return the score of positive reviews/total reviews
@@ -164,6 +174,8 @@ def results(page):
             result['name'] = hit.name
             result['city'] = hit.city
             result['star'] = hit.star
+            result['postcode'] = hit.postcode
+            result['address'] = hit.address
             result['review'] = hit.review
 
         resultList[hit.meta.id] = result
@@ -293,6 +305,16 @@ def nearby(page):
             else:
                 result['star'] = hit.star
 
+            if 'postcode' in hit.meta.highlight:
+                result['postcode'] = hit.meta.highlight.postcode[0]
+            else:
+                result['postcode'] = hit.postcode
+
+            if 'address' in hit.meta.highlight:
+                result['address'] = hit.meta.highlight.address[0]
+            else:
+                result['address'] = hit.address
+
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
             else:
@@ -301,6 +323,8 @@ def nearby(page):
             result['name'] = hit.name
             result['city'] = hit.city
             result['star'] = hit.star
+            result['postcode'] = hit.postcode
+            result['address'] = hit.address
             result['review'] = hit.review
 
         resultList[hit.meta.id] = result
