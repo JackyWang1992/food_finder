@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+<link href='https://fonts.googleapis.com/css?family=Roboto' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css?family=Open Sans' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css?family=Permanent Marker' rel='stylesheet'>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body bgcolor="white">
+<title>Nearby Restaurants</title>
+<style>
+.sansserif {
+    font-family: "Times New Roman", Times, sans-serif;
+    font-weight: bold;
+}
+
+.restName {
+	font-family: Oswald;
+	font-weight: bold;
+}
+
+p.mode {
+    color:grey;
+    line-height:20px;
+    height:60px;
+    overflow:hidden;
+    font-size:14px;
+	font-family: 'Open Sans';
+}
+p.results {
+    color:grey;
+    line-height:20px;
+    height:60px;
+    overflow:hidden;
+    font-size:14px
+}
+p.cannotfind {
+    background-color:pink;
+    text-align:center;
+    border-left: 6px solid red;
+	font-family: 'Open Sans';
+}
+.header {
+    background-color:black;
+    color:lightgrey;
+}
+.searchbox {
+    width:100%;
+    float:left;
+    background-color:white;
+    border-top: 2px dotted black;
+	margin-bottom: 20px;
+	font-family: Open Sans;
+	font-size: 10px;
+}
+.contents{
+	padding-top:100px;
+    margin-top:100px;
+    padding:0;
+    clear:left;
+}
+
+.titleBox{
+	width: 100%;
+	background-color:#DC7633;
+	margin: 0;
+	padding:0;
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	margin-bottom: 100px;
+}
+
+.title{
+	margin-bottom: 100px;
+	margin-top: 50px;
+	margin-left: 45%;
+	font-family: Permanent Marker;
+	font-size: 48px;
+	color:white;
+}
+
+.nextButton{
+	width:60px;
+	float:left;
+	background-color:#DC7633;
+	color:white;
+	font-family:Open Sans;
+	border:none;
+}
+
+.nextButton:hover{
+	cursor: pointer;
+	background-color: #C14A1E;
+}
+</style>
+
+<div class="titleBox">
+	<div class="title">Nearby</div>
+</div>
+
+<div class="contents" style="padding-top:150px;">
+<p>
+    {% if stop_len %}
+        Ignoring term:
+        {% for stop in stops %}
+            {{ stop }}
+        {% endfor %}
+    {% endif%}
+</p>
+    {% if res_num %}
+        {% for res in results %}
+        <ul>
+            <pre class="restName"><a href="/documents/{{res}}" style="color:black;text-decoration:none;" target="_blank">  {{ results[res]['name']|safe }} </a> <span style="font-size: 12px; font-family: Open Sans; font-weight:normal;">Food<span style="color:#EF3E36; font-weight:bold;">Advisor</span> Score: {{results[res]['score']}} </span></pre>
+            <p class="results" style="font-family:Open Sans; font-size:12px;">{{results[res]['review'] | safe}}</p>
+        </ul>
+        {% endfor %}
+    {% else %}
+        {% for res in results %}
+            <p class="cannotfind">{{res}}</p>
+        {% endfor %}
+    {% endif %}
+</div>
+</body>
+</html>
