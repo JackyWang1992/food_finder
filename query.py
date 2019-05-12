@@ -18,7 +18,6 @@ from nltk.corpus import stopwords
 import nltk
 import time
 
-
 from naivebayes import NaiveBayes
 from index import Restaurant
 from pprint import pprint
@@ -33,6 +32,7 @@ app = Flask(__name__)
 tmp_text = ""
 tmp_city = ""
 tmp_state = ""
+tmp_postcode = ""
 gresults = {}
 mode = "text conjunctive"
 stop_lst = set(stopwords.words('english'))
@@ -109,7 +109,8 @@ def results(page):
                 if len(ph) > 0:
                     s = s.query('multi_match', query=ph, type='phrase', fields=['name', 'review'], operator='and')
             if len(remaining_text) > 0:
-                s = s.query('multi_match', query=remaining_text, type='cross_fields', fields=['name', 'review'], operator='and')
+                s = s.query('multi_match', query=remaining_text, type='cross_fields', fields=['name', 'review'],
+                            operator='and')
         else:
             s = s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='and')
 
@@ -191,20 +192,23 @@ def results(page):
         return render_template('page_SERP.html', mode=mode, results=message, res_num=result_num, page_num=page,
                                queries=shows)
 
+
 '''
 Runs the classifier on all the surrounding text of a query keyword
 then, calculate the ratio of all positive sentiment over all reviews
 '''
+
+
 def find_concordance_sentiment(text, text_query):
     queries = [w for w in re.split('\s+', text_query) if w]
     weights = 0
     for query in queries:
-        review_count = len(text.concordance_list(query,lines=10000))
+        review_count = len(text.concordance_list(query, lines=10000))
         if review_count == 0:
             weights += 0
         else:
             pos_count = 0
-            for i in text.concordance_list(query,lines=10000):
+            for i in text.concordance_list(query, lines=10000):
                 surrounding = []
                 if i.left is not None:
                     for w in i.left:
@@ -218,7 +222,94 @@ def find_concordance_sentiment(text, text_query):
                             surrounding.append(w.lower())
                 pos_count += classifier.predict(surrounding)
             weights += pos_count / review_count
-    return weights/len(queries)
+    return weights / len(queries)
+
+
+@app.route("/nearby", defaults={'page': 1}, methods=['GET', 'POST'])
+@app.route("/nearby/<page>", methods=['GET', 'POST'])
+def nearby(page):
+    global tmp_text
+    global tmp_city
+    global tmp_state
+    global tmp_postcode
+    global gresults
+
+    if type(page) is not int:
+        page = int(page.encode('utf-8'))
+    if request.method == 'POST':
+        postcode_query = str(request.form['nearby'])
+        tmp_postcode = postcode_query
+    else:
+        postcode_query = tmp_postcode
+
+    text_query = ""
+    city_query = ""
+    # store query values to display in search boxes in UI
+    shows = {}
+    shows['query'] = text_query
+    shows['city'] = city_query
+
+    search = Search(index='sample_restaurant_index')
+
+    if len(postcode_query) > 0:
+        s = search.query('match', postcode=postcode_query)
+    else:
+        s = search
+
+        # highlight
+    s = s.highlight_options(pre_tags='<mark>', post_tags='</mark>')
+    s = s.highlight('name', fragment_size=999999999, number_of_fragments=1)
+    s = s.highlight('review', fragment_size=999999999, number_of_fragments=1)
+    s = s.highlight('city', fragment_size=999999999, number_of_fragments=1)
+
+    # extract data for current page
+    start = 0 + (page - 1) * 10
+    end = 10 + (page - 1) * 10
+
+    response = s[start:end].execute()
+
+    # insert data into response
+    resultList = {}
+    for hit in response.hits:
+        result = {}
+        result['score'] = hit.meta.score
+        if 'highlight' in hit.meta:
+            if 'name' in hit.meta.highlight:
+                result['name'] = hit.meta.highlight.name[0]
+            else:
+                result['name'] = hit.name
+
+            if 'city' in hit.meta.highlight:
+                result['city'] = hit.meta.highlight.city[0]
+            else:
+                result['city'] = hit.city
+
+            if 'star' in hit.meta.highlight:
+                result['star'] = hit.meta.highlight.star[0]
+            else:
+                result['star'] = hit.star
+
+            if 'review' in hit.meta.highlight:
+                result['review'] = hit.meta.highlight.review[0]
+            else:
+                result['review'] = hit.review
+        else:
+            result['name'] = hit.name
+            result['city'] = hit.city
+            result['star'] = hit.star
+            result['review'] = hit.review
+
+        resultList[hit.meta.id] = result
+
+    # make the result list available globally
+    gresults = resultList
+
+    # get the total number of matching results
+    result_num = response.hits.total
+
+    # if we find the results, extract title and text information from doc_data, else do nothing
+    return render_template('page_nearby.html', mode=mode, results=resultList, res_num=result_num, page_num=page,
+                           queries=shows)
 
 
 # display a particular document given a result number
