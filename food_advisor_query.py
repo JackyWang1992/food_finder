@@ -121,6 +121,15 @@ def results(page):
     else:
         mode = "conjunctive"
 
+    tmp_response = tmp_s[start:end].execute()
+
+    if response.hits.total == 0 and tmp_response.hits.total > 0:
+        mode = "disjunctive"
+        s = tmp_s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='or')
+        response = s[start:end].execute()
+    else:
+        mode = "conjunctive"
+
     # insert data into response
     resultList = {}
     for hit in response.hits:
