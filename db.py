@@ -96,7 +96,7 @@ def merge():
     curr = conn.cursor()
     # BUSINESS + REVIEW
     curr.execute(
-        "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state, BUSINESS.latitude, BUSINESS.longitude"
+        "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state, BUSINESS.postcode"
         "group_concat(REVIEW.review, '\n\n\n\n\n\n'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny)"
         " FROM BUSINESS, REVIEW "
         " WHERE BUSINESS.business_id = REVIEW.business_id "
@@ -134,12 +134,11 @@ def merge():
         dd['review_count'] = content[8]
         dd['stars'] = content[9]
         dd['state'] = content[10]
-        dd['latitude'] = content[11]
-        dd['longitude'] = content[12]
-        dd['review'] = content[13]
-        dd['useful'] = content[14]
-        dd['cool'] = content[15]
-        dd['funny'] = content[16]
+        dd['postcode'] = content[11]
+        dd['review'] = content[12]
+        dd['useful'] = content[13]
+        dd['cool'] = content[14]
+        dd['funny'] = content[15]
 
         # build training test for naive bayes classifier
         # dd['review'] = content[0]
