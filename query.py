@@ -12,11 +12,14 @@ Search DSL:
 https://elasticsearch-dsl.readthedocs.io/en/latest/search_dsl.html
 """
 
-import re, string
+import re, string, pickle, os
 from flask import *
 from nltk.corpus import stopwords
 import nltk
+import time
 
+
+from naivebayes import NaiveBayes
 from index import Restaurant
 from pprint import pprint
 from elasticsearch_dsl import Q
@@ -33,6 +36,7 @@ tmp_state = ""
 gresults = {}
 mode = "text conjunctive"
 stop_lst = set(stopwords.words('english'))
+classifier = pickle.load(open("nb_pickle", 'rb'))
 
 
 # display query page
@@ -66,7 +70,6 @@ def results(page):
             text_query = text_query.replace("\"", "")
 
         city_query = request.form['city']
-
 
         # update global variable template data
         tmp_text = text_query
@@ -144,7 +147,9 @@ def results(page):
 
             # used for sentimental analysis
             text = nltk.Text(hit.review.split())
-            findconcordance(text, text_query)
+            # here, return the score of positive reviews/total reviews
+            sentiment_score = find_concordance_sentiment(text, text_query)
+            print(sentiment_score)
 
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
@@ -186,8 +191,13 @@ def results(page):
         return render_template('page_SERP.html', mode=mode, results=message, res_num=result_num, page_num=page,
                                queries=shows)
 
-
-def findconcordance(text, text_query):
+'''
+Runs the classifier on all the surrounding text of a query keyword
+then, calculate the ratio of all positive sentiment over all reviews
+'''
+def find_concordance_sentiment(text, text_query):
+    review_count = len(text.concordance_list(text_query,lines=10000))
+    pos_count = 0
     for i in text.concordance_list(text_query,lines=10000):
         surrounding = []
         if i.left is not None:
@@ -200,8 +210,8 @@ def findconcordance(text, text_query):
                 if w and w not in stop_lst and w not in string.punctuation:
                     w = re.sub('(\.|\?|\,|\;|\!|\(|\))+', '', w)
                     surrounding.append(w.lower())
-        print(surrounding)
-
+        pos_count += classifier.predict(surrounding)
+    return pos_count / review_count
 
 
 # display a particular document given a result number
@@ -221,4 +231,6 @@ def documents(res):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     app.run(debug=True)
+    print("=== Built index in %s seconds ===" % (time.time() - start_time))
