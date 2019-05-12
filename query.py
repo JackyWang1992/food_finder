@@ -196,22 +196,29 @@ Runs the classifier on all the surrounding text of a query keyword
 then, calculate the ratio of all positive sentiment over all reviews
 '''
 def find_concordance_sentiment(text, text_query):
-    review_count = len(text.concordance_list(text_query,lines=10000))
-    pos_count = 0
-    for i in text.concordance_list(text_query,lines=10000):
-        surrounding = []
-        if i.left is not None:
-            for w in i.left:
-                if w and w not in stop_lst and w not in string.punctuation:
-                    w = re.sub('(\.|\?|\,|\;|\!|\(|\))+', '', w)
-                    surrounding.append(w.lower())
-        if i.right is not None:
-            for w in i.right:
-                if w and w not in stop_lst and w not in string.punctuation:
-                    w = re.sub('(\.|\?|\,|\;|\!|\(|\))+', '', w)
-                    surrounding.append(w.lower())
-        pos_count += classifier.predict(surrounding)
-    return pos_count / review_count
+    queries = [w for w in re.split('\s+', text_query) if w]
+    weights = 0
+    for query in queries:
+        review_count = len(text.concordance_list(query,lines=10000))
+        if review_count == 0:
+            weights += 0
+        else:
+            pos_count = 0
+            for i in text.concordance_list(query,lines=10000):
+                surrounding = []
+                if i.left is not None:
+                    for w in i.left:
+                        if w and w not in stop_lst and w not in string.punctuation:
+                            w = re.sub('(\.|\?|\,|\;|\!|\(|\))+', '', w)
+                            surrounding.append(w.lower())
+                if i.right is not None:
+                    for w in i.right:
+                        if w and w not in stop_lst and w not in string.punctuation:
+                            w = re.sub('(\.|\?|\,|\;|\!|\(|\))+', '', w)
+                            surrounding.append(w.lower())
+                pos_count += classifier.predict(surrounding)
+            weights += pos_count / review_count
+    return weights/len(queries)
 
 
 # display a particular document given a result number
@@ -231,6 +238,4 @@ def documents(res):
 
 
 if __name__ == '__main__':
-    start_time = time.time()
     app.run(debug=True)
-    print("=== Built index in %s seconds ===" % (time.time() - start_time))
