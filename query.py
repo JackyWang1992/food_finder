@@ -12,11 +12,18 @@ Search DSL:
 https://elasticsearch-dsl.readthedocs.io/en/latest/search_dsl.html
 """
 
-import re, string, pickle
+import re, string, pickle, os
 from flask import *
 from nltk.corpus import stopwords
 import nltk
+import time
+
+from naivebayes import NaiveBayes
+from index import Restaurant
+from pprint import pprint
+from elasticsearch_dsl import Q
 from elasticsearch_dsl.utils import AttrList
+from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 
 app = Flask(__name__)
@@ -80,12 +87,17 @@ def results(page):
     # Create a search object to query our index 
     search = Search(index='sample_restaurant_index')
 
+    # Build up your elasticsearch query in piecemeal fashion based on the user's parameters passed in.
+    # The search API is "chainable".
+    # Each call to search.query method adds criteria to our growing elasticsearch query.
+    # You will change this section based on how you want to process the query data input into your interface.
+
     # fuzzy search on cities field
     if len(city_query) > 0:
         s = search.query('fuzzy', city={'value': city_query, 'transpositions': True})
     else:
         s = search
-    tmp_s = s
+    temp_s = s
 
     # Conjunctive search over multiple fields (title and text) using the text_query passed in
     if len(text_query) > 0:
@@ -112,23 +124,6 @@ def results(page):
     s = s.highlight('city', fragment_size=999999999, number_of_fragments=1)
 
     response = s[start:end].execute()
-    tmp_response = tmp_s[start:end].execute()
-
-    if response.hits.total == 0 and tmp_response.hits.total > 0:
-        mode = "disjunctive"
-        s = tmp_s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='or')
-        response = s[start:end].execute()
-    else:
-        mode = "conjunctive"
-
-    tmp_response = tmp_s[start:end].execute()
-
-    if response.hits.total == 0 and tmp_response.hits.total > 0:
-        mode = "disjunctive"
-        s = tmp_s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='or')
-        response = s[start:end].execute()
-    else:
-        mode = "conjunctive"
 
     # insert data into response
     resultList = {}
@@ -151,25 +146,15 @@ def results(page):
             else:
                 result['star'] = hit.star
 
-            if 'postcode' in hit.meta.highlight:
-                result['postcode'] = hit.meta.highlight.postcode[0]
-            else:
-                result['postcode'] = hit.postcode
-
-            if 'address' in hit.meta.highlight:
-                result['address'] = hit.meta.highlight.address[0]
-            else:
-                result['address'] = hit.address
-
             # used for sentimental analysis
             text = nltk.Text(hit.review.split())
             # here, return the score of positive reviews/total reviews
             sentiment_score = find_concordance_sentiment(text, text_query)
-
-            #STILL PLAYING AROUND!
-            result['fa_score'] = result['score'] + sentiment_score + (result['star'] / result['score'])
-            # hit.meta.score = result['score']
-            # print(result['score'])
+			
+			##STILL PLAYING AROUND!
+            result['fa_score'] = result['score'] + sentiment_score + (result['star']/result['score'])
+            #hit.meta.score = result['score']
+            #print(result['score'])
 
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
@@ -179,8 +164,6 @@ def results(page):
             result['name'] = hit.name
             result['city'] = hit.city
             result['star'] = hit.star
-            result['postcode'] = hit.postcode
-            result['address'] = hit.address
             result['review'] = hit.review
 
         resultList[hit.meta.id] = result
@@ -310,16 +293,6 @@ def nearby(page):
             else:
                 result['star'] = hit.star
 
-            if 'postcode' in hit.meta.highlight:
-                result['postcode'] = hit.meta.highlight.postcode[0]
-            else:
-                result['postcode'] = hit.postcode
-
-            if 'address' in hit.meta.highlight:
-                result['address'] = hit.meta.highlight.address[0]
-            else:
-                result['address'] = hit.address
-
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
             else:
@@ -328,8 +301,6 @@ def nearby(page):
             result['name'] = hit.name
             result['city'] = hit.city
             result['star'] = hit.star
-            result['postcode'] = hit.postcode
-            result['address'] = hit.address
             result['review'] = hit.review
 
         resultList[hit.meta.id] = result
