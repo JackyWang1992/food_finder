@@ -95,7 +95,7 @@ def results(page):
         s = search.query('fuzzy', city={'value': city_query, 'transpositions': True})
     else:
         s = search
-    temp_s = s
+    tmp_s = s
 
     # Conjunctive search over multiple fields (title and text) using the text_query passed in
     if len(text_query) > 0:
@@ -123,6 +123,15 @@ def results(page):
 
     response = s[start:end].execute()
 
+    tmp_response = tmp_s[start:end].execute()
+
+    if response.hits.total == 0 and tmp_response.hits.total > 0:
+        mode = "disjunctive"
+        s = tmp_s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='or')
+        response = s[start:end].execute()
+    else:
+        mode = "conjunctive"
+
     # use this code to sort all the result according to our new scores
     # but it's too time-consuming, thus we thought it's not a good approach for a search engine.
     # total = s.count()
@@ -142,14 +151,37 @@ def results(page):
                 result['name'] = hit.meta.highlight.name[0]
             else:
                 result['name'] = hit.name
+
             if 'city' in hit.meta.highlight:
                 result['city'] = hit.meta.highlight.city[0]
             else:
                 result['city'] = hit.city
+
             if 'star' in hit.meta.highlight:
                 result['star'] = hit.meta.highlight.star[0]
             else:
                 result['star'] = hit.star
+
+            if 'postcode' in hit.meta.highlight:
+                result['postcode'] = hit.meta.highlight.postcode[0]
+            else:
+                result['postcode'] = hit.postcode
+
+            if 'address' in hit.meta.highlight:
+                result['address'] = hit.meta.highlight.address[0]
+            else:
+                result['address'] = hit.address
+
+            # used for sentimental analysis
+            text = nltk.Text(hit.review.split())
+            # here, return the score of positive reviews/total reviews
+            sentiment_score = find_concordance_sentiment(text, text_query)
+			
+			##STILL PLAYING AROUND!
+            result['fa_score'] = result['score'] + sentiment_score + (result['star']/result['score'])
+            #hit.meta.score = result['score']
+            #print(result['score'])
+
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
             else:
@@ -158,6 +190,8 @@ def results(page):
             result['name'] = hit.name
             result['city'] = hit.city
             result['star'] = hit.star
+            result['postcode'] = hit.postcode
+            result['address'] = hit.address
             result['review'] = hit.review
         heap.append((hit.meta.score, hit.meta.id, result))
     heap = sorted(heap, key= lambda x:x[0], reverse=True)
@@ -192,7 +226,6 @@ def results(page):
 
         return render_template('page_SERP.html', mode=mode, results=message, res_num=result_num, page_num=page,
                                queries=shows)
-
 
 
 '''
@@ -289,6 +322,16 @@ def nearby(page):
             else:
                 result['star'] = hit.star
 
+            if 'postcode' in hit.meta.highlight:
+                result['postcode'] = hit.meta.highlight.postcode[0]
+            else:
+                result['postcode'] = hit.postcode
+
+            if 'address' in hit.meta.highlight:
+                result['address'] = hit.meta.highlight.address[0]
+            else:
+                result['address'] = hit.address
+
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
             else:
@@ -297,6 +340,8 @@ def nearby(page):
             result['name'] = hit.name
             result['city'] = hit.city
             result['star'] = hit.star
+            result['postcode'] = hit.postcode
+            result['address'] = hit.address
             result['review'] = hit.review
 
         resultList[hit.meta.id] = result
