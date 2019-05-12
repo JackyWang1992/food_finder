@@ -97,7 +97,7 @@ def results(page):
         s = search.query('fuzzy', city={'value': city_query, 'transpositions': True})
     else:
         s = search
-    temp_s = s
+    tmp_s = s
 
     # Conjunctive search over multiple fields (title and text) using the text_query passed in
     if len(text_query) > 0:
@@ -125,6 +125,15 @@ def results(page):
 
     response = s[start:end].execute()
 
+    tmp_response = tmp_s[start:end].execute()
+
+    if response.hits.total == 0 and tmp_response.hits.total > 0:
+        mode = "disjunctive"
+        s = tmp_s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='or')
+        response = s[start:end].execute()
+    else:
+        mode = "conjunctive"
+
     # insert data into response
     resultList = {}
     for hit in response.hits:
@@ -146,6 +155,16 @@ def results(page):
             else:
                 result['star'] = hit.star
 
+            if 'postcode' in hit.meta.highlight:
+                result['postcode'] = hit.meta.highlight.postcode[0]
+            else:
+                result['postcode'] = hit.postcode
+
+            if 'address' in hit.meta.highlight:
+                result['address'] = hit.meta.highlight.address[0]
+            else:
+                result['address'] = hit.address
+
             # used for sentimental analysis
             text = nltk.Text(hit.review.split())
             # here, return the score of positive reviews/total reviews
@@ -164,6 +183,8 @@ def results(page):
             result['name'] = hit.name
             result['city'] = hit.city
             result['star'] = hit.star
+            result['postcode'] = hit.postcode
+            result['address'] = hit.address
             result['review'] = hit.review
 
         resultList[hit.meta.id] = result
@@ -293,6 +314,16 @@ def nearby(page):
             else:
                 result['star'] = hit.star
 
+            if 'postcode' in hit.meta.highlight:
+                result['postcode'] = hit.meta.highlight.postcode[0]
+            else:
+                result['postcode'] = hit.postcode
+
+            if 'address' in hit.meta.highlight:
+                result['address'] = hit.meta.highlight.address[0]
+            else:
+                result['address'] = hit.address
+
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
             else:
@@ -301,6 +332,8 @@ def nearby(page):
             result['name'] = hit.name
             result['city'] = hit.city
             result['star'] = hit.star
+            result['postcode'] = hit.postcode
+            result['address'] = hit.address
             result['review'] = hit.review
 
         resultList[hit.meta.id] = result
