@@ -12,18 +12,11 @@ Search DSL:
 https://elasticsearch-dsl.readthedocs.io/en/latest/search_dsl.html
 """
 
-import re, string, pickle, os
+import re, string, pickle
 from flask import *
 from nltk.corpus import stopwords
 import nltk
-import time
-
-from naivebayes import NaiveBayes
-from food_advisor_index import Restaurant
-from pprint import pprint
-from elasticsearch_dsl import Q
 from elasticsearch_dsl.utils import AttrList
-from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
 
 app = Flask(__name__)
@@ -86,11 +79,6 @@ def results(page):
 
     # Create a search object to query our index 
     search = Search(index='sample_restaurant_index')
-
-    # Build up your elasticsearch query in piecemeal fashion based on the user's parameters passed in.
-    # The search API is "chainable".
-    # Each call to search.query method adds criteria to our growing elasticsearch query.
-    # You will change this section based on how you want to process the query data input into your interface.
 
     # fuzzy search on cities field
     if len(city_query) > 0:

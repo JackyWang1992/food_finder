@@ -6,8 +6,7 @@ from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 from elasticsearch_dsl import Index, Document, Text, Keyword, Integer, Completion
 from elasticsearch_dsl.connections import connections
-from elasticsearch_dsl.analysis import tokenizer, analyzer, token_filter
-from elasticsearch_dsl.query import MultiMatch, Match
+from elasticsearch_dsl.analysis import analyzer, token_filter
 from itertools import permutations
 
 # Connect to local host server
@@ -16,22 +15,13 @@ connections.create_connection(hosts=['127.0.0.1'])
 # Create elasticsearch object
 es = Elasticsearch()
 
-# Define analyzers appropriate for your data.
-# You can create a custom analyzer by choosing among elasticsearch options
-# or writing your own functions.
-# Elasticsearch also has default analyzers that might be appropriate.
+# all analysers
 my_word_delimiter = token_filter('my_word_delimiter', type='word_delimiter', preserve_original=True, catenate_all=True)
 
 my_analyzer = analyzer('custom1',
                        tokenizer='standard',
                        filter=['lowercase', 'stop',my_word_delimiter])
 
-
-
-# --- Add more analyzers here ---
-# use stopwords... or not?
-# use stemming... or not?
-# the analyzer which tokenize for text, use stopwords stemming, lowercase and ascii-folding
 text_analyzer = analyzer('custom2',
                          tokenizer='letter',
                          filter=["stop", "lowercase", "porter_stem", "asciifolding",my_word_delimiter]
@@ -63,7 +53,6 @@ class Restaurant(Document):
     name = Text(fields={'keyword': Keyword()})
     suggest = Completion(analyzer=ascii_fold)  # for autocomplete
     review = Text(analyzer=text_analyzer)
-    # star = Text(analyzer=folding_analyzer)
     star = Integer()
     review_count = Integer()
     cool = Integer()
@@ -85,19 +74,6 @@ class Restaurant(Document):
             'input': [' '.join(p) for p in permutations(self.name.split())],
             'weight': self.star
         }
-
-    # class Index:
-    #     name = 'test-suggest'
-    #     settings = {
-    #         'number_of_shards': 1,
-    #         'number_of_replicas': 0
-    #     }
-    # time = Text(analyzer='simple')
-    # categories = Text(analyzer=cat_analyzer)
-
-    # --- Add more fields here ---
-    # What data type for your field? List?
-    # Which analyzer makes sense for each field?
 
     # override the Document save method to include subclass field definitions
     def save(self, *args, **kwargs):
