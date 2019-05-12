@@ -105,9 +105,9 @@ class Restaurant(Document):
 
 
 # Populate the index
-# when time is not type of , just return 0 instead
+# when number is float or integer, return directly, else if it is a string of digit, parse, else just return 0 instead
 def get_num(num):
-    if isinstance(num, float):
+    if isinstance(num, float) or isinstance(num, int):
         return num
     else:
         if num.isdigit():
