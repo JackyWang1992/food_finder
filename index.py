@@ -1,13 +1,11 @@
-import json
-import re
-import time
+# Build index from the AZ-restaurant-reviews.json corpus for Elasticsearch.
 
+import json, time
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 from elasticsearch_dsl import Index, Document, Text, Keyword, Integer, Completion
 from elasticsearch_dsl.connections import connections
-from elasticsearch_dsl.analysis import tokenizer, analyzer, token_filter
-from elasticsearch_dsl.query import MultiMatch, Match
+from elasticsearch_dsl.analysis import analyzer, token_filter
 from itertools import permutations
 
 # Connect to local host server
@@ -16,34 +14,28 @@ connections.create_connection(hosts=['127.0.0.1'])
 # Create elasticsearch object
 es = Elasticsearch()
 
-# Define analyzers appropriate for your data.
-# You can create a custom analyzer by choosing among elasticsearch options
-# or writing your own functions.
-# Elasticsearch also has default analyzers that might be appropriate.
+# Define analyzers: using a token_filter to handle Super-man, super man as superman
 my_word_delimiter = token_filter('my_word_delimiter', type='word_delimiter', preserve_original=True, catenate_all=True)
 
 my_analyzer = analyzer('custom1',
                        tokenizer='standard',
-                       filter=['lowercase', 'stop',my_word_delimiter])
+                       filter=['lowercase', 'stop', my_word_delimiter])
 
-
-
-# --- Add more analyzers here ---
-# use stopwords... or not?
-# use stemming... or not?
-# the analyzer which tokenize for text, use stopwords stemming, lowercase and ascii-folding
+# text analyzer contains stemmer and lowercase thing
 text_analyzer = analyzer('custom2',
                          tokenizer='letter',
-                         filter=["stop", "lowercase", "porter_stem", "asciifolding",my_word_delimiter]
+                         filter=["stop", "lowercase", "porter_stem", "asciifolding", my_word_delimiter]
                          )
+
 # the folding analyzer which only use lowercase and ascii-folding
 folding_analyzer = analyzer('custom3',
                             tokenizer='standard',
-                            filter=["lowercase", "asciifolding",my_word_delimiter])
+                            filter=["lowercase", "asciifolding", my_word_delimiter])
+
 # the category analyzer which use lowercase, ascii-folding and stemming
 cat_analyzer = analyzer('custom4',
                         tokenizer='standard',
-                        filter=["lowercase", "asciifolding", "porter_stem",my_word_delimiter])
+                        filter=["lowercase", "asciifolding", "porter_stem", my_word_delimiter])
 
 ascii_fold = analyzer(
     'ascii_fold',
@@ -56,14 +48,12 @@ ascii_fold = analyzer(
 )
 
 
-# Define document mapping (schema) by defining a class as a subclass of Document.
-# This defines fields and their properties (type and analysis applied).
-# You can use existing es analyzers or use ones you define yourself as above.
+# Define document mapping by defining the restaurant object
+# and process fields and properties using analyzers defined above.
 class Restaurant(Document):
     name = Text(fields={'keyword': Keyword()})
     suggest = Completion(analyzer=ascii_fold)  # for autocomplete
     review = Text(analyzer=text_analyzer)
-    # star = Text(analyzer=folding_analyzer)
     star = Integer()
     review_count = Integer()
     cool = Integer()
@@ -86,19 +76,6 @@ class Restaurant(Document):
             'weight': self.star
         }
 
-    # class Index:
-    #     name = 'test-suggest'
-    #     settings = {
-    #         'number_of_shards': 1,
-    #         'number_of_replicas': 0
-    #     }
-    # time = Text(analyzer='simple')
-    # categories = Text(analyzer=cat_analyzer)
-
-    # --- Add more fields here ---
-    # What data type for your field? List?
-    # Which analyzer makes sense for each field?
-
     # override the Document save method to include subclass field definitions
     def save(self, *args, **kwargs):
         return super(Restaurant, self).save(*args, **kwargs)
@@ -118,8 +95,7 @@ def get_num(num):
 
 def buildIndex():
     """
-    buildIndex creates a new film index, deleting any existing index of
-    the same name.
+    buildIndex creates a new restaurant index, deleting any existing index of the same name.
     It loads a json file containing the movie corpus and does bulk loading
     using a generator function.
     """
@@ -130,21 +106,19 @@ def buildIndex():
     restaurant_index.document(Restaurant)
     restaurant_index.create()
 
-    # Open the json film corpus
+    # Open the json restaurant corpus
     with open('az_restaurant_reviews.json', 'r', encoding='utf-8') as data_file:
-        # load movies from json file into dictionary
+        # load restaurant from json file into dictionary
         restaurants = json.load(data_file)
         size = len(restaurants)
-        # print(size)
-        # print(restaurants['5']['review'])
 
     # Action series for bulk loading with helpers.bulk function.
-    # Implemented as a generator, to return one movie with each call.
+    # Implemented as a generator, to return one restaurant with each call.
     # Note that we include the index name here.
     # The Document type is always 'doc'.
     # Every item to be indexed must have a unique key.
     def actions():
-        # mid is movie id (used as key into movies dictionary)
+        # mid is restaurant id (used as key into movies dictionary)
         for mid in range(1, size + 1):
             yield {
                 "_index": "sample_restaurant_index",
@@ -154,8 +128,7 @@ def buildIndex():
                 "suggest": restaurants[str(mid - 1)]['business_name'],
                 "review": restaurants[str(mid - 1)]['review'],
                 "address": restaurants[str(mid - 1)]['address'],
-                "city": restaurants[str(mid - 1)]['city'],  # You would like to convert runtime to
-                # integer (in minutes) --- Add more fields here ---
+                "city": restaurants[str(mid - 1)]['city'],
                 "star": get_num(restaurants[str(mid - 1)]['stars']),
                 "state": restaurants[str(mid - 1)]['state'],
                 "review_count": get_num(restaurants[str(mid - 1)]['review_count']),
@@ -168,7 +141,6 @@ def buildIndex():
 
     helpers.bulk(es, actions())
     print(restaurant_index)
-
 
 # command line invocation builds index and prints the running time.
 def main():

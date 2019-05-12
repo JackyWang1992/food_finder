@@ -1,34 +1,31 @@
+# Data pre-process from the huge json file provided by Yelp, extract AZ restaurants and CA as test
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
+import os, json, re, io
 import sqlite3
-import json
 import pandas as pd
-import re
-import io
- 
+
+'''
+Build database using sqlite3 api, and insert all the tables to the database
+'''
 def load_data():
-   
+    # to build the database
     if os.path.exists("yelp.db"):
         os.remove("yelp.db")
-
-    # next, we will create a new SQLite database.
     # create a database connection.
     conn = sqlite3.connect("yelp.db")
-    # create a cursor (this is like a single session)
+    # create a cursor
     curr = conn.cursor()
     # send a pragma command to tell SQLite to check foreign key
-    # constraints (it does not by default :( )
     curr.execute("PRAGMA foreign_keys = ON;")
 
-
-    # create tables.
+    # create tables
     curr.execute("CREATE TABLE BUSINESS (address TEXT ,attributes TEXT, business_id TEXT PRIMARY KEY, categories TEXT, city TEXT, hours TEXT, is_open INTEGER, latitude FLOAT , longitude FLOAT ,name TEXT,postal_code TEXT,review_count INTEGER ,stars FLOAT ,state TEXT)")
     curr.execute("CREATE TABLE REVIEW (business_id TEXT, cool INTEGER , date TEXT, funny INTEGER , review_id TEXT, stars INTEGER, review TEXT, useful INTEGER , user_id TEXT)")
     curr.execute("CREATE TABLE TIP (tip TEXT, date TEXT, compliment_count INTEGER, business_id TEXT, user_id TEXT)")
 
-    # commit is like save -- if you don't do it, nothing is written.
+    # commit
     conn.commit()
 
     # json files are too large for memory, so read them chunk by chunk using panda reader
@@ -40,7 +37,7 @@ def load_data():
         # convert it from dataframe to list of list
         business_t = list(map(list, buffer.values))
         for i in business_t:
-            # for dictionary object, conver them to string
+            # for dictionary object, convert them to string
             i[1] = str(i[1]) if isinstance(i[1], dict) else "None"
             i[3] = str(i[3]) if isinstance(i[3], dict) else "None"
             i[5] = str(i[5]) if isinstance(i[5], dict) else "None"
@@ -48,14 +45,15 @@ def load_data():
         curr.executemany("INSERT INTO BUSINESS (address,attributes, business_id, categories, city, hours, is_open, latitude, longitude, name ,postal_code,review_count,stars,state) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);", business_t)
         # commit change
         conn.commit()
-        # to stop the while loop
+        # to stop the while loop if all file been read
         try:
             buffer = next(business_reader)
         except:
             break
     business_reader.close()
     print("finish business")
-    # read tip.json
+
+    # read tip.json, same as above
     tip_reader = pd.read_json("tip.json", lines=True, chunksize=buffer_size, encoding='utf-8')
     buffer = next(tip_reader)
     while True:
@@ -71,6 +69,7 @@ def load_data():
             break
     tip_reader.close()
     print("finish tip")
+
     # read review.json
     review_reader = pd.read_json("review.json", lines=True, chunksize=buffer_size)
     buffer = next(review_reader)
@@ -87,14 +86,22 @@ def load_data():
             break
     review_reader.close()
     print("finish review")
-
+    # finish reading all tables
     conn.close()
 
+'''
+Merge all three tables, and get the information we need for AZ restaurant search.
+'''
 def merge():
-    result = open("result2.json", 'w')
+    # output to result.json
+    result = open("result.json", 'w')
     conn = sqlite3.connect("yelp1.db")
     curr = conn.cursor()
-    # BUSINESS + REVIEW
+
+    # merge BUSINESS + REVIEW
+    # Yelp's data has all categories as None or All, so we figured out that all restaurant has the 'RestaurantsAttire'
+    # in the Attributes, we use that to distinguish restaurant from all other businesses.
+    # For reviews, we concatenate all reviews from one restaurant as one entry to prevent duplicate results.
     curr.execute(
         "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state"
         "group_concat(REVIEW.review, '\n\n\n\n\n\n'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny)"
@@ -115,7 +122,6 @@ def merge():
     #     " WHERE BUSINESS.business_id = REVIEW.business_id "
     #     " AND BUSINESS.state IN ('CA', 'NY', 'IL')"
     #     " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'")
-
 
     # write to json
     final = {}
@@ -145,11 +151,12 @@ def merge():
 
         final[i] = dd
         i += 1
-
+    # write to json file
     json.dump(final, result)
     result.close()
 
 
 if __name__ == "__main__":
+    # loading file takes too long, so comment it out for now.
     # load_data()
     merge()

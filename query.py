@@ -1,7 +1,7 @@
 """
-This module implements a (partial, sample) query interface for elasticsearch movie search. 
-You will need to rewrite and expand sections to support the types of queries over the fields in your UI.
+ElasticSearch restaurant search query interface.
 
+Useful links:
 Documentation for elasticsearch query DSL:
 https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl.html
 
@@ -18,8 +18,6 @@ from nltk.corpus import stopwords
 
 from naivebayes import NaiveBayes
 from index import Restaurant
-from pprint import pprint
-from elasticsearch_dsl import Q
 from elasticsearch_dsl.utils import AttrList
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search
@@ -48,8 +46,6 @@ def search():
 @app.route("/results/<page>", methods=['GET', 'POST'])
 def results(page):
     global tmp_text, phrases  # to store phrases like "philip roth"
-    global tmp_min_star
-    global tmp_max_star
     global tmp_state
     global tmp_city
     global gresults
@@ -58,9 +54,9 @@ def results(page):
     # convert the <page> parameter in url to integer.
     if type(page) is not int:
         page = int(page.encode('utf-8'))
-        # if the method of request is post (for initial query), store query in local global variables
-    # if the method of request is get (for "next" results), extract query contents from client's global variables  
 
+    # if the method of request is post (for initial query), store query in local global variables
+    # if the method of request is get (for "next" results), extract query contents from client's global variables
     if request.method == 'POST':
         text_query = request.form['query']
         phrases = re.findall(r"\"(.*?)\"", text_query)  # get specific phrases from query text
@@ -83,19 +79,16 @@ def results(page):
     shows['query'] = text_query
     shows['city'] = city_query
 
-    # Create a search object to query our index 
-    search = Search(index='sample_restaurant_index',using=Elasticsearch(timeout=300))
+    # Create a search object to query our index, add timeout time
+    search = Search(index='sample_restaurant_index', using=Elasticsearch(timeout=300))
 
-    # Build up your elasticsearch query in piecemeal fashion based on the user's parameters passed in.
-    # The search API is "chainable".
-    # Each call to search.query method adds criteria to our growing elasticsearch query.
-    # You will change this section based on how you want to process the query data input into your interface.
-
+    # Chainable elasticsearch query as below:
     # fuzzy search on cities field
     if len(city_query) > 0:
         s = search.query('fuzzy', city={'value': city_query, 'transpositions': True})
     else:
         s = search
+    # for disjunctive search, first save a temporaray search object
     tmp_s = s
 
     # Conjunctive search over multiple fields (title and text) using the text_query passed in
@@ -122,6 +115,7 @@ def results(page):
     s = s.highlight('review', fragment_size=999999999, number_of_fragments=1)
     s = s.highlight('city', fragment_size=999999999, number_of_fragments=1)
 
+    # get response
     response = s[start:end].execute()
 
     tmp_response = tmp_s[start:end].execute()
@@ -133,15 +127,18 @@ def results(page):
     else:
         mode = "conjunctive"
 
-    # use this code to sort all the result according to our new scores
-    # but it's too time-consuming, thus we thought it's not a good approach for a search engine.
-    # total = s.count()
-    # response = s[0:total].execute()
-
+    # update the score with our sentimental analysis for the reviews
+    '''
+    use this code to sort all the result according to our new scores
+    but it's too time-consuming, thus we thought it's not a good approach for a search engine.
+    total = s.count()
+    response = s[0:total].execute()
+    '''
     heap = []
     resultList = {}
     count_score = 1
     max_score = 0
+
     for hit in response.hits:
         result = {}
         if count_score == 1:
@@ -150,8 +147,8 @@ def results(page):
         text = nltk.Text(hit.review.split())
         # here, return the score of positive reviews/total reviews
         sentiment_score = find_concordance_sentiment(text, text_query)
-        # hit.meta.score = hit.meta.score * sentiment_score
-        hit.meta.score = calc_score(hit.meta.score, hit.star,sentiment_score, 0, max_score)
+        # here, caculate the score combined with our score and sentimental analysis score
+        hit.meta.score = calc_score(hit.meta.score, hit.star, sentiment_score, 0, max_score)
         result['score'] = hit.meta.score
 
         if 'highlight' in hit.meta:
@@ -195,9 +192,9 @@ def results(page):
         resultList[hit.meta.id] = result
     heap = sorted(heap, key=lambda x:x[0], reverse=True)
 
+    # sorted new result and put them back to resultList
     for element in heap:
         resultList[element[1]] = element[2]
-    # print(resultList)
 
     # make the result list available globally
     gresults = resultList
@@ -231,10 +228,11 @@ def results(page):
 def calc_score(base_score, star, sentiment, min_score, max_score):
     min_rescale = 0
     max_rescale = 1
-    scale_factor = float((max_rescale - min_rescale) /(max_score - min_score))
+    scale_factor = float((max_rescale - min_rescale) / (max_score - min_score))
     scaled_base_score = scale_factor * (base_score - max_score) + max_rescale
     score = scaled_base_score + sentiment + star
     return score
+
 
 '''
 Runs the classifier on all the surrounding text of a query keyword
@@ -265,7 +263,9 @@ def find_concordance_sentiment(text, text_query):
             weights += pos_count / review_count
     return weights / len(queries)
 
-
+'''
+Peform a "more like this" search to provide users the restaurants in the nearby area
+'''
 @app.route("/nearby", defaults={'page': 1}, methods=['GET', 'POST'])
 @app.route("/nearby/<page>", methods=['GET','POST'])
 def nearby(page):
@@ -354,7 +354,7 @@ def nearby(page):
 
         resultList[hit.meta.id] = result
 
-    # make the result list available globally
+    # add the nearby result list into the gresult, preventing a keyerror
     gresults.update(resultList)
 
     # get the total number of matching results
@@ -382,4 +382,5 @@ def documents(res):
 
 
 if __name__ == '__main__':
+    # run with debut mode
     app.run(debug=True)

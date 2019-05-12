@@ -11,15 +11,20 @@ from nltk.tokenize import word_tokenize
 class NaiveBayes(object):
     def __init__(self):
         self.class_dict = {0: 'neg', 1: 'pos'}
-        # use Hu and Liu's sentimental lexicon as feature.
+
+        # use Hu and Liu's sentimental lexicon as feature, but it takes too long, so we use a 180words dictionary
         # f = open('feature.txt')
         # s = f.read()
         # l = s.split('\n')
         # self.feature_dict = {}
+        # for i in range(len(l)):
+        #     self.feature_dict[i] = l[i]
+
         self.vocabulary = set()
         self.doc_voc = defaultdict(list)
         self.stopword = set(stopwords.words('english'))
 
+        # 180-words dictionary extracted from Hu and Liu's lexicon
         self.feature_dict = {0: 'accomplished', 1: 'achievement', 2: 'admire', 3: 'admiring', 4: 'advantage',
                              5: 'affectionate', 6: 'amaze', 7: 'amazed', 8: 'amazing', 9: 'amuse', 10: 'amusing',
                              11: 'appealing', 12: 'attractive', 13: 'awesome', 14: 'beautiful', 15: 'best', 16: 'bonus',
@@ -53,8 +58,6 @@ class NaiveBayes(object):
                              164: 'terrible', 165: 'thumb-down', 166: 'thumbs-down', 167: 'tired', 168: 'trash',
                              169: 'ugly', 170: 'unacceptable', 171: 'unhappy', 172: 'upset', 173: 'vomit', 174: 'waste',
                              175: 'wasteful', 176: 'weak', 177: 'worse', 178: 'worst', 179: 'worthless', 180: 'wrong'}
-        # for i in range(len(l)):
-        #     self.feature_dict[i] = l[i]
 
         self.prior = np.zeros(len(self.class_dict))
         self.likelihood = np.zeros((len(self.class_dict), len(self.feature_dict)))
@@ -81,6 +84,7 @@ class NaiveBayes(object):
                 review = re.sub('\.', '', review)
                 tokens = word_tokenize(review)
                 tokens = [w for w in tokens if w and w not in self.stopword and w not in string.punctuation ]
+                # build vocabulary
                 self.vocabulary = self.vocabulary | set(tokens)
                 if content['stars'] == 'neg':
                     num_res[0] += 1
@@ -88,10 +92,12 @@ class NaiveBayes(object):
                 elif content['stars'] == 'pos':
                     num_res[1] += 1
                     self.doc_voc[1].extend(tokens)
+            # calculate likelihood
             for i in self.feature_dict:
                 for j in self.class_dict:
                     wcount = self.doc_voc[j].count(self.feature_dict[i])
                     self.likelihood[j][i] = np.log((wcount + 1) / (len(self.doc_voc[j]) + len(self.vocabulary)))
+            # calculate prior probability
             self.prior[0] = np.log(num_res[0] / (num_res[0] + num_res[1]))
             self.prior[1] = np.log(num_res[1] / (num_res[0] + num_res[1]))
 
@@ -100,11 +106,12 @@ class NaiveBayes(object):
     Use the classifier trained to predict the sentiment of keywords-surrounding words.
     '''
     def predict(self, tokens):
-        # iterate over testing documents
+        # iterate over the review tokens
         feature = np.zeros((len(self.feature_dict), 1))
         for i in range(0, len(self.feature_dict)):
             wcount = tokens.count(self.feature_dict[i])
             feature[i] = wcount
+        # use numpy matrix production
         prob = np.matmul(self.likelihood, feature)
         for i in range(len(self.prior)):
             prob[i][0] = prob[i][0] + self.prior[i]
@@ -117,4 +124,5 @@ if __name__ == '__main__':
     # so that it is using the NaiveBayes class defined above rather __main__.NaiveBayes
     nb = NaiveBayes()
     nb.train()
+    # save the trained classifier so that in query.py we don't need to train it from beginning
     nb_pickle = pickle.dump(nb, open("nb_pickle", 'wb'))
