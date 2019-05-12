@@ -73,6 +73,7 @@ class Restaurant(Document):
     state = Keyword()
     address = Keyword()
     date = Keyword()
+    postcode = Integer()
 
     def clean(self):
         """
@@ -104,12 +105,15 @@ class Restaurant(Document):
 
 
 # Populate the index
-# when time is not digit, just return 0 instead
+# when time is not type of , just return 0 instead
 def get_num(num):
     if isinstance(num, float):
-        return float(num)
+        return num
     else:
-        return 0
+        if num.isdigit():
+            return float(num)
+        else:
+            return 0
 
 
 def buildIndex():
@@ -158,7 +162,8 @@ def buildIndex():
                 "useful": get_num(restaurants[str(mid - 1)]['useful']),
                 "cool": get_num(restaurants[str(mid - 1)]['cool']),
                 "funny": get_num(restaurants[str(mid - 1)]['funny']),
-                "date": restaurants[str(mid - 1)]['date']
+                "date": restaurants[str(mid - 1)]['date'],
+                "postcode": restaurants[str(mid - 1)]['postal_code']
             }
 
     helpers.bulk(es, actions())
