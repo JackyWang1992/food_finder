@@ -115,11 +115,11 @@ p.cannotfind {
     {% if res_num %}
         {% for res in results %}
         <ul>
-            <pre class="restName"><a href="/documents/{{res}}" style="color:black;text-decoration:none;" target="_blank">  {{ results[res]['name']|safe }} </a> <span style="font-size: 12px; font-family: Open Sans; font-weight:normal;">Food<span style="color:#EF3E36; font-weight:bold;">Advisor</span> Score: {{results[res]['score']}} </span></pre>
+            <pre class="restName"><a href="/documents/{{res}}" style="color:black;text-decoration:none;" target="_blank">  {{ results[res]['name']|safe }} </a> <span style="font-size: 12px; font-family: Open Sans; font-weight:normal;">Score: {{results[res]['score']}}   <b>Food<span style="color:#EF3E36; font-weight:bold;">Advisor</span> Score: {{results[res]['fa_score']}} </b></span></pre>
             <p class="results" style="font-family:Open Sans; font-size:12px;">{{results[res]['review'] | safe}}</p>
             <form action="/nearby" name="nearby" method="post" class="page">
                 <input type="hidden" name="nearby", value="{{ results[res]['postcode']}}">
-                <input type="submit" value="nearby restaurants" id="more">
+                <input type="submit" style="background-color:#EF3E36;font-family:Open Sans;font-size:12px;color:white;border:none;" value="Food Nearby" id="more">
             </form>
         </ul>
         {% endfor %}
