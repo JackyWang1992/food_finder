@@ -150,7 +150,11 @@ def results(page):
             text = nltk.Text(hit.review.split())
             # here, return the score of positive reviews/total reviews
             sentiment_score = find_concordance_sentiment(text, text_query)
-            print(sentiment_score)
+			
+			##STILL PLAYING AROUND!
+            result['fa_score'] = result['score'] + sentiment_score + (result['star']/result['score'])
+            #hit.meta.score = result['score']
+            #print(result['score'])
 
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
