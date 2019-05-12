@@ -10,17 +10,19 @@
 <title>{{title|safe}} Reviews</title>
 <style>
 .restName {
-	margin-bottom: 100px;
-	margin-top: 50px;
-	margin-left: 35%;
 	font-family: Permanent Marker;
 	font-size: 48px;
 	color:white;
+	display: block;
+	padding-top:100px;
+	margin: 0;
+	margin-bottom:50px;
+	text-align: center;
 }
 
 .titleBox{
 	width: 100%;
-	background-color:#DC7633;
+	background-color:#EF3E36;
 	margin: 0;
 	padding:0;
 	display: block;
@@ -37,7 +39,7 @@
 	<div class="restName">{{title|safe}}</div>
 </div>
 
-<div class="restaurant" style="margin-top:250px;word-wrap:break-word; padding:10px;">
+<div class="restaurant" style="margin-top:250px;word-wrap:break-word; padding:10px;margin-bottom:50px;">
     {% for term in restaurant %}
         <pre style="white-space: pre-wrap;font-family:Open Sans;font-size:12px;"><strong>{{term}}</strong>: {{restaurant[term] | safe}}</pre>
     {% endfor %}

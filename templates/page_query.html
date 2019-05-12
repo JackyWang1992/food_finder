@@ -9,19 +9,27 @@
 <body bgcolor="white">
 <title>FoodAdvisor</title>
 <style>
+
+body, html{
+height: 100%;
+padding: 0;
+margin: 0;
+overflow: hidden;
+}
+
 .tagline{
+position: absolute;
+top: 350px;
+right:180px;
 float: right;
 text-align: center;
-margin-right: 170px;
-margin-top: 250px;
-margin-bottom: 5px;
 font-family: Permanent Marker;
 font-size: 42px;
 }
 
 .searchRest{
 position: absolute;
-top:350px;
+top:410px;
 right: 50px;
 /*float: right;
 margin-left: 100px;
@@ -46,21 +54,6 @@ background-color: #ce3831;
 cursor: pointer;
 }
 
-.pictureTag{
-font-family: Permanent Marker;
-font-size: 62px;
-color: black;
-float: left;
-}
-
-
-.pictures{
-position: absolute;
-margin: 0px;
-top: 0px;
-left: 0px;
-z-index: -100px;
-}
 
 * {box-sizing: border-box;}
 body {font-family: Verdana, sans-serif;}
@@ -73,17 +66,6 @@ img {vertical-align: middle;}
   position: relative;
   margin: auto;
   z-index: -100px;
-}
-
-/* Caption text */
-.text {
-  color: #f2f2f2;
-  font-size: 15px;
-  padding: 8px 12px;
-  position: absolute;
-  bottom: 8px;
-  width: 100%;
-  text-align: center;
 }
 
 /* Number text (1/3 etc) */
@@ -141,7 +123,7 @@ font-weight: bold;
 margin: 0px;
 padding: 0px;
 position: absolute;
-top: 400px;
+top: 460px;
 right: 65px;
 }
 
@@ -153,10 +135,59 @@ font-family: Open Sans;
 font-size: 16px;
 }
 
+
+
 </style>
+	<div class="mySlides fade" style="width:100%;height:100%;">
+	  <img src="https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" style="float:left;width:600px;height:100%;">
+	</div>
 
+	<div class="mySlides fade" style="width:100%;height:100%;">
+	  <div class="numbertext">2 / 10</div>
+	  <img src="https://images.pexels.com/photos/286283/pexels-photo-286283.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="float:left;width:600px;height:100%;">
+	</div>
 
-<div style="width:100%">
+	<div class="mySlides fade" style="width:100%;height:100%;">
+	  <div class="numbertext">3 / 10</div>
+	  <img src="https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="float:left;width:600px;height:100%;">
+	</div>
+	
+	<div class="mySlides fade" style="width:100%;height:100%;">
+	  <div class="numbertext">4 / 10</div>
+	  <img src="https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="float:left;width:600px;height:100%;">
+	</div>
+
+	<div class="mySlides fade" style="width:100%;height:100%;">
+	  <div class="numbertext">5 / 10</div>
+	  <img src="https://images.pexels.com/photos/5938/food-salad-healthy-lunch.jpg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="float:left;width:600px;height:100%;">
+	</div>
+
+	<div class="mySlides fade" style="width:100%;height:100%;">
+	  <div class="numbertext">6 / 10</div>
+	  <img src="https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="float:left;width:600px;height:100%;">
+	</div>
+	
+	<div class="mySlides fade" style="width:100%;height:100%;">
+	  <div class="numbertext">7 / 10</div>
+	  <img src="https://images.pexels.com/photos/7048/food-art-sugar-display.jpg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="float:left;width:600px;height:100%;">
+	</div>
+
+	<div class="mySlides fade" style="width:100%;height:100%;">
+	  <div class="numbertext">8 / 10</div>
+	  <img src="https://images.pexels.com/photos/884600/pexels-photo-884600.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="float:left;width:600px;height:100%;">
+	</div>
+
+	<div class="mySlides fade" style="width:100%;height:100%;">
+	  <div class="numbertext">9 / 10</div>
+	  <img src="https://images.pexels.com/photos/1098599/pexels-photo-1098599.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="float:left;width:600px;height:100%;">
+	</div>
+
+	<div class="mySlides fade" style="width:100%;height:100%;">
+	  <div class="numbertext">10 / 10</div>
+	  <img src="https://images.pexels.com/photos/1333746/pexels-photo-1333746.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="float:left;width:600px;height:100%;">
+	</div>
+
+    <div class="tagline"> <span style="color:#DC7633;font-family:Open Sans;font-weight:bold;font-size: 34px; float: left; margin-right:-210px; position: relative; top:-35px;">Hey Arizona, <br> </span> What are you craving?</div>
 
 <form action="/results" name="search" method="post">
 	<div class="searchCity">	
@@ -175,7 +206,6 @@ font-size: 16px;
 					<option value="Peoria">
                 </datalist>
 		</div>
-        <div class="tagline"> <span style="color:#DC7633;font-family:Open Sans;font-weight:bold;font-size: 34px; float: left; margin-right:-210px; position: relative; top:-35px;">Hey Arizona, <br> </span> What are you craving?</div>
     	<div class="searchRest">
 			<textarea style="font-family:Open Sans;font-size: 14px;color: #808080;"rows="2" cols="60" name="query">Tacos, burgers, ramen...</textarea>
 			<input class="searchButton" type="submit" value="Find Restauraunts">
@@ -184,58 +214,6 @@ font-size: 16px;
 
 	<div class="companyName"><span style="font-size:12px;font-weight:normal;">Powered by</span> Food<span style="color:#EF3E36;">Advisor</span></div>
 	
-							
-		<div class="pictures">
-			<div class="mySlides fade">
-			  <div class="numbertext">1 / 10</div>
-			  <img src="https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" style="width:600px;height:577px;object-fit:cover;">
-			</div>
-
-			<div class="mySlides fade">
-			  <div class="numbertext">2 / 10</div>
-			  <img src="https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" style="width:600px;height:577px;object-fit:cover;">
-			</div>
-
-			<div class="mySlides fade">
-			  <div class="numbertext">3 / 10</div>
-			  <img src="https://images.pexels.com/photos/1639562/pexels-photo-1639562.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
-			</div>
-			
-			<div class="mySlides fade">
-			  <div class="numbertext">4 / 10</div>
-			  <img src="https://images.pexels.com/photos/1279330/pexels-photo-1279330.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
-			</div>
-
-			<div class="mySlides fade">
-			  <div class="numbertext">5 / 10</div>
-			  <img src="https://images.pexels.com/photos/5938/food-salad-healthy-lunch.jpg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
-			</div>
-
-			<div class="mySlides fade">
-			  <div class="numbertext">6 / 10</div>
-			  <img src="https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
-			</div>
-			
-			<div class="mySlides fade">
-			  <div class="numbertext">7 / 10</div>
-			  <img src="https://images.pexels.com/photos/7048/food-art-sugar-display.jpg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
-			</div>
-
-			<div class="mySlides fade">
-			  <div class="numbertext">8 / 10</div>
-			  <img src="https://images.pexels.com/photos/884600/pexels-photo-884600.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
-			</div>
-
-			<div class="mySlides fade">
-			  <div class="numbertext">9 / 10</div>
-			  <img src="https://images.pexels.com/photos/1098599/pexels-photo-1098599.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
-			</div>
-
-			<div class="mySlides fade">
-			  <div class="numbertext">10 / 10</div>
-			  <img src="https://images.pexels.com/photos/359993/pexels-photo-359993.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500" style="width:600px;height:577px;object-fit:cover;">
-			</div>
-		</div>
 
 </div>
 		
