@@ -95,63 +95,56 @@ def merge():
     conn = sqlite3.connect("yelp1.db")
     curr = conn.cursor()
     # BUSINESS + REVIEW
-    # curr.execute(
-    #     "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state,"
-    #     "group_concat(REVIEW.review, '\n\n\n\n\n\n'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny), REVIEW.date"
-    #     " FROM BUSINESS, REVIEW "
-    #     " WHERE BUSINESS.business_id = REVIEW.business_id "
-    #     " AND BUSINESS.state = 'AZ'"
-    #     " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'"
-    #     " GROUP BY BUSINESS.business_id")
+    curr.execute(
+        "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state, BUSINESS.latitude, BUSINESS.longitude"
+        "group_concat(REVIEW.review, '\n\n\n\n\n\n'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny)"
+        " FROM BUSINESS, REVIEW "
+        " WHERE BUSINESS.business_id = REVIEW.business_id "
+        " AND BUSINESS.state = 'AZ'"
+        " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'"
+        " GROUP BY BUSINESS.business_id")
 
     # build training set for naive bayes
-    curr.execute(
-        "SELECT REVIEW.review, "
-        " CASE"
-        " WHEN REVIEW.stars <= 3 THEN 'neg'"
-        " WHEN REVIEW.stars >3 THEN 'pos'"
-        " END as sentiment"
-        " FROM BUSINESS, REVIEW"
-        " WHERE BUSINESS.business_id = REVIEW.business_id "
-        " AND BUSINESS.state IN ('CA', 'NY', 'IL')"
-        " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'")
-
-    # BUSINESS + TIP
     # curr.execute(
-    #     "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state,"
-    #     "TIP.tip, TIP.date, TIP.compliment_count"
-    #     " FROM BUSINESS, TIP"
-    #     " WHERE BUSINESS.business_id = TIP.business_id "
-    #     " AND BUSINESS.state = 'CA'")
-    # print(curr)
+    #     "SELECT REVIEW.review, "
+    #     " CASE"
+    #     " WHEN REVIEW.stars <= 3 THEN 'neg'"
+    #     " WHEN REVIEW.stars >3 THEN 'pos'"
+    #     " END as sentiment"
+    #     " FROM BUSINESS, REVIEW"
+    #     " WHERE BUSINESS.business_id = REVIEW.business_id "
+    #     " AND BUSINESS.state IN ('CA', 'NY', 'IL')"
+    #     " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'")
+
+
     # write to json
     final = {}
     i = 0
     # convert to dict
     for content in curr.fetchall():
         dd = {}
-        # dd['business_id'] = content[0]
-        # dd['business_name'] = content[1]
-        # dd['address'] = content[2]
-        # dd['attributes'] = content[3]
-        # dd['categories'] = content[4]
-        # dd['city'] = content[5]
-        # dd['hours'] = content[6]
-        # dd['postal_code'] = content[7]
-        # dd['review_count'] = content[8]
-        # dd['stars'] = content[9]
-        # dd['state'] = content[10]
-        # dd['review'] = content[11]
-        # dd['useful'] = content[12]
-        # dd['cool'] = content[13]
-        # dd['funny'] = content[14]
-        # dd['date'] = content[15]
+        dd['business_id'] = content[0]
+        dd['business_name'] = content[1]
+        dd['address'] = content[2]
+        dd['attributes'] = content[3]
+        dd['categories'] = content[4]
+        dd['city'] = content[5]
+        dd['hours'] = content[6]
+        dd['postal_code'] = content[7]
+        dd['review_count'] = content[8]
+        dd['stars'] = content[9]
+        dd['state'] = content[10]
+        dd['latitude'] = content[11]
+        dd['longitude'] = content[12]
+        dd['review'] = content[13]
+        dd['useful'] = content[14]
+        dd['cool'] = content[15]
+        dd['funny'] = content[16]
 
         # build training test for naive bayes classifier
-        dd['review'] = content[0]
-        dd['stars'] = content[1]
+        # dd['review'] = content[0]
+        # dd['stars'] = content[1]
 
-        # dd['review_id'] = content[16]
         final[i] = dd
         i += 1
 
