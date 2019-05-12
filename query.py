@@ -12,11 +12,9 @@ Search DSL:
 https://elasticsearch-dsl.readthedocs.io/en/latest/search_dsl.html
 """
 
-import re, string, pickle, os
+import re, string, pickle, nltk
 from flask import *
 from nltk.corpus import stopwords
-import nltk
-import time
 
 from naivebayes import NaiveBayes
 from index import Restaurant
@@ -85,7 +83,7 @@ def results(page):
     shows['city'] = city_query
 
     # Create a search object to query our index 
-    search = Search(index='sample_restaurant_index')
+    search = Search(index='sample_restaurant_index',using=Elasticsearch(timeout=300))
 
     # Build up your elasticsearch query in piecemeal fashion based on the user's parameters passed in.
     # The search API is "chainable".
@@ -125,37 +123,33 @@ def results(page):
 
     response = s[start:end].execute()
 
-    # insert data into response
-    resultList = {}
+    # use this code to sort all the result according to our new scores
+    # but it's too time-consuming, thus we thought it's not a good approach for a search engine.
+    # total = s.count()
+    # response = s[0:total].execute()
+
+    heap = []
     for hit in response.hits:
         result = {}
+        text = nltk.Text(hit.review.split())
+        # here, return the score of positive reviews/total reviews
+        sentiment_score = find_concordance_sentiment(text, text_query)
+        hit.meta.score = hit.meta.score * sentiment_score
         result['score'] = hit.meta.score
+
         if 'highlight' in hit.meta:
             if 'name' in hit.meta.highlight:
                 result['name'] = hit.meta.highlight.name[0]
             else:
                 result['name'] = hit.name
-
             if 'city' in hit.meta.highlight:
                 result['city'] = hit.meta.highlight.city[0]
             else:
                 result['city'] = hit.city
-
             if 'star' in hit.meta.highlight:
                 result['star'] = hit.meta.highlight.star[0]
             else:
                 result['star'] = hit.star
-
-            # used for sentimental analysis
-            text = nltk.Text(hit.review.split())
-            # here, return the score of positive reviews/total reviews
-            sentiment_score = find_concordance_sentiment(text, text_query)
-			
-			##STILL PLAYING AROUND!
-            result['fa_score'] = result['score'] + sentiment_score + (result['star']/result['score'])
-            #hit.meta.score = result['score']
-            #print(result['score'])
-
             if 'review' in hit.meta.highlight:
                 result['review'] = hit.meta.highlight.review[0]
             else:
@@ -165,8 +159,11 @@ def results(page):
             result['city'] = hit.city
             result['star'] = hit.star
             result['review'] = hit.review
-
-        resultList[hit.meta.id] = result
+        heap.append((hit.meta.score, hit.meta.id, result))
+    heap = sorted(heap, key= lambda x:x[0], reverse=True)
+    resultList = {}
+    for element in heap[start:end]:
+        resultList[element[1]] = element[2]
 
     # make the result list available globally
     gresults = resultList
@@ -197,12 +194,11 @@ def results(page):
                                queries=shows)
 
 
+
 '''
 Runs the classifier on all the surrounding text of a query keyword
 then, calculate the ratio of all positive sentiment over all reviews
 '''
-
-
 def find_concordance_sentiment(text, text_query):
     queries = [w for w in re.split('\s+', text_query) if w]
     weights = 0
