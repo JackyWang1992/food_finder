@@ -97,7 +97,7 @@ def results(page):
         s = search.query('fuzzy', city={'value': city_query, 'transpositions': True})
     else:
         s = search
-    temp_s = s
+    tmp_s = s
 
     # Conjunctive search over multiple fields (title and text) using the text_query passed in
     if len(text_query) > 0:
@@ -124,6 +124,15 @@ def results(page):
     s = s.highlight('city', fragment_size=999999999, number_of_fragments=1)
 
     response = s[start:end].execute()
+
+    tmp_response = tmp_s[start:end].execute()
+
+    if response.hits.total == 0 and tmp_response.hits.total > 0:
+        mode = "disjunctive"
+        s = tmp_s.query('multi_match', query=text_query, type='cross_fields', fields=['name', 'review'], operator='or')
+        response = s[start:end].execute()
+    else:
+        mode = "conjunctive"
 
     # insert data into response
     resultList = {}
