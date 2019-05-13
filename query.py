@@ -224,7 +224,10 @@ def results(page):
         return render_template('page_SERP.html', mode=mode, results=message, res_num=result_num, page_num=page,
                                queries=shows)
 
-
+"""
+#calculates the foodAdvisor score by combing normalized tf-idf elasticSearch score, 
+the overall star rating of the restaurant and sentimental analysis score of the restaurant reviews
+"""
 def calc_score(base_score, star, sentiment, min_score, max_score):
     min_rescale = 0
     max_rescale = 1
