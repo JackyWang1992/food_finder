@@ -106,7 +106,7 @@ def merge():
     # For reviews, we concatenate all reviews from one restaurant as one entry to prevent duplicate results.
     curr.execute(
         "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code, BUSINESS.review_count, BUSINESS.stars, BUSINESS.state,"
-        "group_concat(REVIEW.review, '\n\n\n\n\n\n'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny)"
+        "group_concat(REVIEW.review, '\n\n\n\n\n\n'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny), REVIEW.date"
         " FROM BUSINESS, REVIEW "
         " WHERE BUSINESS.business_id = REVIEW.business_id "
         " AND BUSINESS.state = 'AZ' "
@@ -147,6 +147,8 @@ def merge():
         dd['useful'] = content[12]
         dd['cool'] = content[13]
         dd['funny'] = content[14]
+        dd['date'] = content[15]
+
 
         # build training test for naive bayes classifier
         # dd['review'] = content[0]
