@@ -189,11 +189,11 @@ def results(page):
             result['address'] = hit.address
             result['review'] = hit.review
         heap.append((hit.meta.score, hit.meta.id, result))
-        resultList[hit.meta.id] = result
+        # resultList[hit.meta.id] = result
     heap = sorted(heap, key=lambda x:x[0], reverse=True)
 
     # sorted new result and put them back to resultList
-    for element in heap:
+    for element in heap[start:end]:
         resultList[element[1]] = element[2]
 
     # make the result list available globally
