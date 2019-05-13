@@ -42,7 +42,9 @@ def load_data():
             i[3] = str(i[3]) if isinstance(i[3], dict) else "None"
             i[5] = str(i[5]) if isinstance(i[5], dict) else "None"
         # insert into the table
-        curr.executemany("INSERT INTO BUSINESS (address,attributes, business_id, categories, city, hours, is_open, latitude, longitude, name ,postal_code,review_count,stars,state) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?);", business_t)
+        curr.executemany("INSERT INTO BUSINESS (address,attributes, business_id, categories, city, hours, is_open, "
+                         "latitude, longitude, name ,postal_code,review_count,stars,state) VALUES "
+                         "(?,?,?,?,?,?,?,?,?,?,?,?,?,?);", business_t)
         # commit change
         conn.commit()
         # to stop the while loop if all file been read
@@ -103,13 +105,14 @@ def merge():
     # in the Attributes, we use that to distinguish restaurant from all other businesses.
     # For reviews, we concatenate all reviews from one restaurant as one entry to prevent duplicate results.
     curr.execute(
-        "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code ,BUSINESS.review_count ,BUSINESS.stars ,BUSINESS.state"
+        "SELECT BUSINESS.business_id,BUSINESS.name, BUSINESS.address, BUSINESS.attributes, BUSINESS.categories, BUSINESS.city, BUSINESS.hours, BUSINESS.postal_code, BUSINESS.review_count, BUSINESS.stars, BUSINESS.state,"
         "group_concat(REVIEW.review, '\n\n\n\n\n\n'), avg(REVIEW.useful), avg(REVIEW.cool), avg(REVIEW.funny)"
         " FROM BUSINESS, REVIEW "
         " WHERE BUSINESS.business_id = REVIEW.business_id "
-        " AND BUSINESS.state = 'AZ'"
+        " AND BUSINESS.state = 'AZ' "
         " AND BUSINESS.attributes LIKE '%RestaurantsAttire%'"
-        " GROUP BY BUSINESS.business_id")
+        " GROUP BY BUSINESS.business_id"
+        " LIMIT 20")
 
     # build training set for naive bayes
     # curr.execute(
@@ -152,6 +155,7 @@ def merge():
         final[i] = dd
         i += 1
     # write to json file
+    print(i)
     json.dump(final, result)
     result.close()
 
